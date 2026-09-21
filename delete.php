@@ -1,9 +1,20 @@
 <?php
 declare(strict_types=1);
 
-require_once "connection.php";
+require_once "auth.php";
+require_login();
 
-$id = (int)($_GET['id'] ?? 0);
+// Deleting is a state change, so it must never happen on a GET. A link or an
+// <img src="delete.php?id=5"> would otherwise destroy a record just because
+// the signed-in admin's browser loaded it.
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header("Location: table.php");
+    exit();
+}
+
+require_csrf();
+
+$id = (int)($_POST['id'] ?? 0);
 
 if ($id > 0) {
     try {

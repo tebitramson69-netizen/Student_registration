@@ -1,13 +1,15 @@
 <?php
 declare(strict_types=1);
 
-require_once "connection.php";
-require_once "helpers.php";
+require_once "auth.php";
+require_login();
 
 $errors  = [];
 $student = null;
 
 if ($_SERVER['REQUEST_METHOD'] === "POST") {
+    require_csrf();
+
     $id = (int)($_POST['id'] ?? 0);
 
     // Keep the submitted values so the form can be redisplayed on error.
@@ -109,6 +111,8 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
     <?php endif; ?>
 
     <form action="update.php" method="post">
+        <?php echo csrf_field(); ?>
+
         <input type="hidden" name="id" value="<?php echo (int)$student['id']; ?>">
 
         <label for="first_name">First Name</label>

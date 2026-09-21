@@ -1,13 +1,15 @@
 <?php
 declare(strict_types=1);
 
-require_once "connection.php";
-require_once "helpers.php";
+require_once "auth.php";
+require_login();
 
 $errors = [];
 $values = ['first_name' => '', 'last_name' => '', 'email' => '', 'telephone' => ''];
 
 if ($_SERVER['REQUEST_METHOD'] === "POST") {
+    require_csrf();
+
     foreach ($values as $field => $_) {
         $values[$field] = trim((string)($_POST[$field] ?? ''));
     }
@@ -75,6 +77,8 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
         <?php endif; ?>
 
         <form action="form.php" method="post">
+            <?php echo csrf_field(); ?>
+
             <label for="first_name">First Name</label>
             <input type="text" id="first_name" name="first_name"
                    value="<?php echo e($values['first_name']); ?>" required>

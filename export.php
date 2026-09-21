@@ -1,7 +1,8 @@
 <?php
 declare(strict_types=1);
 
-require_once "connection.php";
+require_once "auth.php";
+require_login();
 
 // Select the columns explicitly so the CSV rows always line up with the header
 // below, whatever order the table happens to declare them in.
@@ -24,11 +25,27 @@ try {
 header('Content-Type: text/csv; charset=utf-8');
 header('Content-Disposition: attachment; filename=students.csv');
 
+/**
+ * A cell starting with =, +, - or @ is treated as a formula by Excel and
+ * LibreOffice when the CSV is opened, so a student named "=cmd|..." would run
+ * as one. Prefixing a single quote keeps the cell as text.
+ */
+function csv_safe(string|int|float|null $value): string
+{
+    $value = (string)$value;
+
+    if ($value !== '' && in_array($value[0], ['=', '+', '-', '@', "\t", "\r"], true)) {
+        return "'" . $value;
+    }
+
+    return $value;
+}
+
 $output = fopen('php://output', 'w');
 fputcsv($output, ['ID', 'First Name', 'Last Name', 'Email', 'Telephone']);
 
 while ($row = $result->fetch_assoc()) {
-    fputcsv($output, $row);
+    fputcsv($output, array_map('csv_safe', $row));
 }
 
 fclose($output);

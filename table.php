@@ -1,8 +1,8 @@
 <?php
 declare(strict_types=1);
 
-require_once "connection.php";
-require_once "helpers.php";
+require_once "auth.php";
+require_login();
 
 // Number of records per page
 $limit = 15;
@@ -23,7 +23,10 @@ $params = [];
 $types  = '';
 
 if ($search !== '') {
-    $like  = '%' . $search . '%';
+    // % and _ are wildcards inside LIKE, and \ escapes them. Without this a
+    // search for "%" matches every student and "100_" matches "1000".
+    $escaped = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $search);
+    $like    = '%' . $escaped . '%';
     $where = "WHERE first_name LIKE ?
                  OR last_name  LIKE ?
                  OR email      LIKE ?
@@ -116,6 +119,14 @@ function pageLink(int $targetPage, string $search, string $sort, string $order):
     </style>
 </head>
 <body>
+    <div class="topbar">
+        <span>Signed in as <strong><?php echo e(current_admin_username()); ?></strong></span>
+        <form action="logout.php" method="post" class="inline-form">
+            <?php echo csrf_field(); ?>
+            <button type="submit" class="link-button">Sign out</button>
+        </form>
+    </div>
+
     <h2>Registered Students (Alphabetical Order)</h2>
 
     <!-- Search Form -->
@@ -152,10 +163,12 @@ function pageLink(int $targetPage, string $search, string $sort, string $order):
             <td><?php echo e($user['telephone']); ?></td>
             <td>
                 <a href="update.php?id=<?php echo (int)$user['id']; ?>">Update</a> |
-                <a href="delete.php?id=<?php echo (int)$user['id']; ?>"
-                   onclick="return confirm('Are you sure you want to delete this student?');">
-                   Delete
-                </a>
+                <form action="delete.php" method="post" class="inline-form"
+                      onsubmit="return confirm('Are you sure you want to delete this student?');">
+                    <?php echo csrf_field(); ?>
+                    <input type="hidden" name="id" value="<?php echo (int)$user['id']; ?>">
+                    <button type="submit" class="link-button">Delete</button>
+                </form>
             </td>
         </tr>
         <?php endforeach; ?>

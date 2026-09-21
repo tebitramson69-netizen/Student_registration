@@ -31,18 +31,37 @@ if (is_file(__DIR__ . '/config.php')) {
     // otherwise fatal here, outside the try block below.
     if (!is_array($fileConfig)) {
         error_log('config.php must return an array of settings.');
-        http_response_code(500);
-        exit('Server configuration error. Please contact the administrator.');
+        fail_startup('Server configuration error. Please contact the administrator.');
     }
 
+    // A typo such as 'databse' would otherwise fall back to the local
+    // development defaults, including the empty root password, on a server
+    // the admin believes is configured.
     $unknown = array_diff_key($fileConfig, $config);
     if ($unknown) {
-        // A typo such as 'databse' would silently fall back to the local
-        // development defaults, including the empty root password.
-        error_log('Unknown config.php keys ignored: ' . implode(', ', array_keys($unknown)));
+        error_log('Unknown config.php keys: ' . implode(', ', array_keys($unknown)));
+        fail_startup('Server configuration error. Please contact the administrator.');
     }
 
     $config = array_merge($config, $fileConfig);
+}
+
+/**
+ * Abort before the application starts, without disclosing why.
+ *
+ * Under CLI it exits non-zero, so a provisioning script chaining commands
+ * with && does not treat a failed startup as success. exit("message") would
+ * print the text but still report status 0.
+ */
+function fail_startup(string $publicMessage): never
+{
+    if (PHP_SAPI === 'cli') {
+        fwrite(STDERR, $publicMessage . "\n");
+        exit(1);
+    }
+
+    http_response_code(500);
+    exit($publicMessage);
 }
 
 try {
@@ -56,6 +75,5 @@ try {
 } catch (mysqli_sql_exception $e) {
     // Log the real reason, show the visitor nothing that describes the server.
     error_log('Database connection failed: ' . $e->getMessage());
-    http_response_code(500);
-    exit('Database connection failed. Please try again later.');
+    fail_startup('Database connection failed. Please try again later.');
 }
