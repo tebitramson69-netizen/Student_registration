@@ -1,15 +1,22 @@
 <?php
-include "connection.php";
+declare(strict_types=1);
 
-if (isset($_GET['id'])) {
-    $id = intval($_GET['id']);
-    $sql = "DELETE FROM students WHERE id = $id";
+require_once "connection.php";
 
-    if (mysqli_query($conn, $sql)) {
-        header("Location: table.php");
-        exit();
-    } else {
-        echo "Error deleting record: " . mysqli_error($conn);
+$id = (int)($_GET['id'] ?? 0);
+
+if ($id > 0) {
+    try {
+        $stmt = $conn->prepare("DELETE FROM students WHERE id = ?");
+        $stmt->bind_param('i', $id);
+        $stmt->execute();
+        $stmt->close();
+    } catch (mysqli_sql_exception $e) {
+        error_log('Student delete failed: ' . $e->getMessage());
     }
 }
-?>
+
+$conn->close();
+
+header("Location: table.php");
+exit();

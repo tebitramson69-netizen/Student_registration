@@ -1,0 +1,29 @@
+name: PHP CI
+
+on:
+  push:
+    branches: [ "main", "claude/**" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  lint:
+    name: Syntax check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Pinned to a commit SHA so a compromised tag cannot silently change the action.
+      - name: Setup PHP
+        uses: shivammathur/setup-php@15c43e89cdef867065b0213be354c2841860869e
+        with:
+          php-version: '8.2'
+          extensions: mysqli
+          coverage: none
+
+      - name: Lint every PHP file
+        run: |
+          set -euo pipefail
+          find . -path ./.git -prune -o -name '*.php' -print0 \
+            | xargs -0 -r -n1 php -l
