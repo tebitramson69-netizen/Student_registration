@@ -32,35 +32,43 @@ if ($search !== '') {
     $types  = 'ssss';
 }
 
-// Total matching records first, so pagination reflects the search results
-// rather than the whole table.
-$countStmt = $conn->prepare("SELECT COUNT(*) AS total FROM students $where");
-if ($params) {
-    $countStmt->bind_param($types, ...$params);
+try {
+    // Total matching records first, so pagination reflects the search results
+    // rather than the whole table.
+    $countStmt = $conn->prepare("SELECT COUNT(*) AS total FROM students $where");
+    if ($params) {
+        $countStmt->bind_param($types, ...$params);
+    }
+    $countStmt->execute();
+    $totalRows = (int)$countStmt->get_result()->fetch_assoc()['total'];
+    $countStmt->close();
+
+    $totalPages = (int)ceil($totalRows / $limit);
+    if ($totalPages > 0 && $page > $totalPages) {
+        $page = $totalPages;
+    }
+    $offset = ($page - 1) * $limit;
+
+    $stmt = $conn->prepare(
+        "SELECT id, first_name, last_name, email, telephone
+         FROM students
+         $where
+         ORDER BY $sort $order
+         LIMIT ? OFFSET ?"
+    );
+    $stmt->bind_param($types . 'ii', ...array_merge($params, [$limit, $offset]));
+    $stmt->execute();
+    $users = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+
+    $conn->close();
+} catch (mysqli_sql_exception $e) {
+    // An uncaught exception would print the SQL and absolute paths, which a
+    // default XAMPP install (display_errors=On) shows to the visitor.
+    error_log('Student listing failed: ' . $e->getMessage());
+    http_response_code(500);
+    exit('Could not load the student list. Please try again later.');
 }
-$countStmt->execute();
-$totalRows  = (int)$countStmt->get_result()->fetch_assoc()['total'];
-$countStmt->close();
-
-$totalPages = (int)ceil($totalRows / $limit);
-if ($totalPages > 0 && $page > $totalPages) {
-    $page = $totalPages;
-}
-$offset = ($page - 1) * $limit;
-
-$stmt = $conn->prepare(
-    "SELECT id, first_name, last_name, email, telephone
-     FROM students
-     $where
-     ORDER BY $sort $order
-     LIMIT ? OFFSET ?"
-);
-$stmt->bind_param($types . 'ii', ...array_merge($params, [$limit, $offset]));
-$stmt->execute();
-$users = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-$stmt->close();
-
-$conn->close();
 
 /**
  * Build a column header link that toggles the sort direction.

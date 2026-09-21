@@ -65,13 +65,19 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
     $id = (int)($_GET['id'] ?? 0);
 
     if ($id > 0) {
-        $stmt = $conn->prepare(
-            "SELECT id, first_name, last_name, email, telephone FROM students WHERE id = ?"
-        );
-        $stmt->bind_param('i', $id);
-        $stmt->execute();
-        $student = $stmt->get_result()->fetch_assoc();
-        $stmt->close();
+        try {
+            $stmt = $conn->prepare(
+                "SELECT id, first_name, last_name, email, telephone FROM students WHERE id = ?"
+            );
+            $stmt->bind_param('i', $id);
+            $stmt->execute();
+            $student = $stmt->get_result()->fetch_assoc();
+            $stmt->close();
+        } catch (mysqli_sql_exception $e) {
+            error_log('Student lookup failed: ' . $e->getMessage());
+            http_response_code(500);
+            exit('Could not load the student. Please try again later.');
+        }
     }
 
     // No id, or no such student: nothing to edit, so go back to the list

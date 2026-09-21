@@ -24,7 +24,25 @@ $config = [
 ];
 
 if (is_file(__DIR__ . '/config.php')) {
-    $config = array_merge($config, require __DIR__ . '/config.php');
+    $fileConfig = require __DIR__ . '/config.php';
+
+    // config.php must `return` an array. A file written in the older
+    // variable-assignment style makes require yield int(1), which would
+    // otherwise fatal here, outside the try block below.
+    if (!is_array($fileConfig)) {
+        error_log('config.php must return an array of settings.');
+        http_response_code(500);
+        exit('Server configuration error. Please contact the administrator.');
+    }
+
+    $unknown = array_diff_key($fileConfig, $config);
+    if ($unknown) {
+        // A typo such as 'databse' would silently fall back to the local
+        // development defaults, including the empty root password.
+        error_log('Unknown config.php keys ignored: ' . implode(', ', array_keys($unknown)));
+    }
+
+    $config = array_merge($config, $fileConfig);
 }
 
 try {
