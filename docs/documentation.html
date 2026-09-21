@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Student Registration System — Technical Documentation</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm 16mm 16mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "DejaVu Sans", "Segoe UI", Arial, sans-serif;
+    font-size: 10.5pt; line-height: 1.55; color: #22262b; margin: 0;
+  }
+  h1, h2, h3, h4 { color: #0b4a86; line-height: 1.25; }
+  h1 { font-size: 22pt; margin: 0 0 4px; }
+  h2 {
+    font-size: 15pt; margin: 26px 0 10px; padding-bottom: 5px;
+    border-bottom: 2px solid #007bff; page-break-after: avoid;
+  }
+  h3 { font-size: 12pt; margin: 18px 0 6px; color: #15406b; page-break-after: avoid; }
+  h4 { font-size: 10.5pt; margin: 12px 0 4px; color: #3a4a5a; page-break-after: avoid; }
+  p, li { orphans: 3; widows: 3; }
+  code, pre { font-family: "DejaVu Sans Mono", Consolas, monospace; }
+  code { background: #eef2f7; padding: 1px 4px; border-radius: 3px; font-size: 9pt; }
+  pre {
+    background: #1f2733; color: #e6edf3; padding: 10px 12px; border-radius: 6px;
+    font-size: 8.5pt; line-height: 1.45; overflow-wrap: break-word; white-space: pre-wrap;
+    page-break-inside: avoid; margin: 8px 0;
+  }
+  pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 9pt; page-break-inside: avoid; }
+  th, td { border: 1px solid #c9d4e0; padding: 6px 8px; text-align: left; vertical-align: top; }
+  th { background: #0b4a86; color: #fff; font-weight: 600; }
+  tr:nth-child(even) td { background: #f5f8fb; }
+  .cover { page-break-after: always; padding-top: 55mm; text-align: center; }
+  .cover .sub { font-size: 13pt; color: #444; margin-top: 6px; }
+  .cover .meta { margin-top: 45mm; font-size: 10pt; color: #555; line-height: 1.9; }
+  .cover .rule { width: 70px; height: 4px; background: #007bff; margin: 18px auto; }
+  .page-break { page-break-before: always; }
+  .callout {
+    border-left: 4px solid #007bff; background: #eef5fd; padding: 9px 12px;
+    margin: 10px 0; page-break-inside: avoid;
+  }
+  .callout.warn { border-left-color: #d9822b; background: #fdf3e7; }
+  .callout.danger { border-left-color: #c0392b; background: #fbebea; }
+  .callout p { margin: 0; }
+  .sev { font-weight: 700; padding: 1px 6px; border-radius: 3px; color: #fff; font-size: 8pt; white-space: nowrap; }
+  .sev.crit { background: #8e1c12; }
+  .sev.high { background: #c0392b; }
+  .sev.med  { background: #d9822b; }
+  .sev.low  { background: #6b7c8c; }
+  ul, ol { margin: 6px 0 6px 0; padding-left: 20px; }
+  li { margin-bottom: 3px; }
+  .toc ol { list-style: none; padding-left: 0; counter-reset: s; }
+  .toc > ol > li { counter-increment: s; margin-bottom: 5px; font-weight: 600; }
+  .toc > ol > li::before { content: counter(s) ". "; color: #007bff; }
+  .toc ol ol { padding-left: 18px; font-weight: 400; margin-top: 3px; }
+  .toc ol ol li::before { content: "– "; color: #8aa0b5; }
+  .ascii { font-family: "DejaVu Sans Mono", monospace; font-size: 8pt; line-height: 1.35;
+           background: #f5f8fb; border: 1px solid #c9d4e0; border-radius: 6px; padding: 10px;
+           white-space: pre; page-break-inside: avoid; overflow-wrap: normal; }
+  .small { font-size: 9pt; color: #5a6672; }
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<div class="cover">
+  <h1>Student Registration System</h1>
+  <div class="rule"></div>
+  <div class="sub">Technical Documentation &amp; Developer Handover Guide</div>
+  <div class="sub small" style="margin-top:10px">Foundation module of a School Management System</div>
+  <div class="meta">
+    <strong>Repository:</strong> tebitramson69-netizen/Student_registration<br>
+    <strong>Author:</strong> Tebit Ramson Titih<br>
+    <strong>Stack:</strong> PHP 8 · MySQL (MariaDB) · HTML5 · CSS3 · Apache (XAMPP)<br>
+    <strong>Document version:</strong> 1.0<br>
+    <strong>Date:</strong> 21 September 2026<br>
+    <strong>Audience:</strong> Developers joining or reviewing this codebase
+  </div>
+</div>
+
+<!-- ============ TOC ============ -->
+<h2>Table of Contents</h2>
+<div class="toc">
+<ol>
+  <li>Executive Summary
+    <ol><li>What the system does today</li><li>Scope clarification: "School Management System"</li></ol></li>
+  <li>Technology Stack &amp; Runtime Environment</li>
+  <li>Project Structure — File by File</li>
+  <li>System Architecture
+    <ol><li>Architectural style</li><li>Request lifecycle</li><li>Navigation map</li></ol></li>
+  <li>Database Design
+    <ol><li>Reconstructed schema</li><li>Recommended DDL</li><li>Data integrity notes</li></ol></li>
+  <li>Feature Walkthrough (Create, Read, Update, Delete, Export)</li>
+  <li>Front-End &amp; Styling</li>
+  <li>Installation &amp; Local Setup (XAMPP)</li>
+  <li>Security Review</li>
+  <li>Known Bugs &amp; Root-Cause Analysis</li>
+  <li>Continuous Integration — Current State</li>
+  <li>Improvement Roadmap</li>
+  <li>Appendix A — Query Reference</li>
+  <li>Appendix B — Glossary</li>
+</ol>
+</div>
+
+<!-- ============ 1 ============ -->
+<h2 class="page-break">1. Executive Summary</h2>
+
+<h3>1.1 What the system does today</h3>
+<p>This project is a <strong>server-rendered PHP web application</strong> that manages a register of students
+stored in a MySQL database. It implements a complete CRUD cycle plus reporting:</p>
+<ul>
+  <li><strong>Create</strong> — a registration form captures first name, last name, email and telephone.</li>
+  <li><strong>Read</strong> — a paginated, sortable, searchable table lists all registered students.</li>
+  <li><strong>Update</strong> — an edit form pre-filled with an existing student's record.</li>
+  <li><strong>Delete</strong> — a link-triggered deletion with a JavaScript confirmation prompt.</li>
+  <li><strong>Export</strong> — the full register is streamed to the browser as a downloadable CSV file.</li>
+</ul>
+<p>There is no framework, no ORM, no build step and no JavaScript bundle. Every page is a standalone PHP
+script that connects to the database, executes SQL, and prints HTML. This is deliberately simple and is
+appropriate for the project's current size; it is also the main constraint discussed in sections 9 and 12.</p>
+
+<h3>1.2 Scope clarification: "School Management System"</h3>
+<div class="callout warn">
+  <p><strong>Important for any developer reading this.</strong> The repository is frequently described as a
+  "school management system". As the code currently stands it is precisely one module of such a system: the
+  <em>student registry</em>. There is no authentication, no user roles, no classes, no courses, no teachers,
+  no enrolment, no grades, no attendance and no fees. Nothing in this document should be read as implying
+  those exist. Section 12 sets out the path from the current registry to a genuine school management system.</p>
+</div>
+<p>Stating this plainly matters: the codebase is 6 PHP files and roughly 300 lines. Anyone told to expect a
+full management platform will waste time looking for tables and modules that were never written.</p>
+
+<!-- ============ 2 ============ -->
+<h2>2. Technology Stack &amp; Runtime Environment</h2>
+<table>
+  <tr><th style="width:22%">Layer</th><th style="width:28%">Technology</th><th>Notes</th></tr>
+  <tr><td>Language</td><td>PHP 8.x</td><td>Procedural style; no Composer dependencies, no autoloader, no <code>composer.json</code>.</td></tr>
+  <tr><td>Database</td><td>MySQL / MariaDB</td><td>Accessed through the <code>mysqli</code> extension, mixing the object-oriented constructor with procedural query functions.</td></tr>
+  <tr><td>Web server</td><td>Apache</td><td>Supplied by XAMPP in development. No <code>.htaccess</code>, no URL rewriting — URLs map directly to files.</td></tr>
+  <tr><td>Markup / styling</td><td>HTML5, CSS3</td><td>One shared stylesheet, <code>style.css</code>, plus an inline <code>&lt;style&gt;</code> block inside <code>table.php</code>.</td></tr>
+  <tr><td>Client scripting</td><td>Inline JavaScript only</td><td>A single <code>onclick="return confirm(...)"</code> on the delete link. No libraries.</td></tr>
+  <tr><td>Version control</td><td>Git / GitHub</td><td>Default branch <code>main</code>.</td></tr>
+  <tr><td>CI</td><td>GitHub Actions</td><td>A Laravel workflow that does not match this project — see section 11.</td></tr>
+</table>
+
+<h3>Connection parameters (development defaults)</h3>
+<p>Defined in <code>connection.php</code> and hard-coded:</p>
+<pre><code>$servername = "localhost";
+$username   = "root";
+$password   = "";          // empty — XAMPP default
+$database   = "student_db";</code></pre>
+
+<!-- ============ 3 ============ -->
+<h2>3. Project Structure — File by File</h2>
+<div class="ascii">Student_registration/
+├── connection.php          Database connection; included by every other PHP file
+├── form.php                Registration form + INSERT handler        (CREATE)
+├── table.php               Student list: search, sort, pagination    (READ)
+├── update.php              Edit form + UPDATE handler                (UPDATE)
+├── delete.php              DELETE handler (no view of its own)       (DELETE)
+├── export.php              Streams the whole register as CSV         (EXPORT)
+├── style.css               Shared stylesheet
+├── README.md               Short project description + setup notes
+├── docs/                   This documentation
+└── .github/workflows/
+    └── laravel.yml         GitHub Actions workflow (misconfigured — section 11)</div>
+
+<table>
+  <tr><th style="width:20%">File</th><th style="width:14%">Lines</th><th>Responsibility</th></tr>
+  <tr><td><code>connection.php</code></td><td>12</td><td>Creates a <code>mysqli</code> object named <code>$conn</code> and terminates the request with <code>die()</code> if the connection fails. Every page begins with <code>include "connection.php";</code>.</td></tr>
+  <tr><td><code>form.php</code></td><td>51</td><td>Dual-purpose: on <code>POST</code> it escapes the four fields and runs an <code>INSERT</code>, then redirects to <code>table.php</code>; otherwise it renders the registration form. This is the de facto entry point of the application — there is no <code>index.php</code>.</td></tr>
+  <tr><td><code>table.php</code></td><td>137</td><td>The largest and most complex file. Handles pagination arithmetic, a whitelisted sort column and direction, an optional <code>LIKE</code> search across four columns, a total-row count, and renders the table with per-row Update/Delete links. Contains one helper function, <code>sortLink()</code>.</td></tr>
+  <tr><td><code>update.php</code></td><td>58</td><td>On <code>GET ?id=</code> it loads one student into <code>$student</code>; on <code>POST</code> it runs the <code>UPDATE</code> and redirects. Renders the pre-filled edit form.</td></tr>
+  <tr><td><code>delete.php</code></td><td>15</td><td>Reads <code>?id=</code>, casts it with <code>intval()</code>, deletes the row and redirects to <code>table.php</code>. Produces no HTML.</td></tr>
+  <tr><td><code>export.php</code></td><td>25</td><td>Sends CSV headers, opens <code>php://output</code> as a stream, writes a header row, then one <code>fputcsv()</code> per record.</td></tr>
+  <tr><td><code>style.css</code></td><td>156</td><td>Blue/white theme (<code>#007bff</code>), card-style form container, striped hoverable table, pagination buttons, focus states.</td></tr>
+</table>
+
+<!-- ============ 4 ============ -->
+<h2 class="page-break">4. System Architecture</h2>
+
+<h3>4.1 Architectural style</h3>
+<p>The application follows the classic <strong>page-controller</strong> pattern of traditional PHP: each URL is a
+physical file, and that file contains its own controller logic, data access and presentation. There is no
+routing layer, no separation of concerns, and no shared layout or template.</p>
+<p>The consequence, which a new developer should understand immediately: <strong>SQL, business rules and HTML
+live in the same file</strong>. In <code>table.php</code>, lines 1–54 are PHP logic and lines 55–137 are the view.
+The two halves are separated only by the closing <code>?&gt;</code> tag.</p>
+
+<div class="ascii">┌──────────────┐    HTTP request     ┌───────────────────────────┐
+│   Browser    │ ──────────────────► │  Apache  →  PHP 8         │
+│              │ ◄────────────────── │                           │
+└──────────────┘    HTML / CSV       │  form.php   table.php     │
+                                     │  update.php delete.php    │
+                                     │  export.php               │
+                                     │        │                  │
+                                     │        ▼                  │
+                                     │   connection.php          │
+                                     └────────┬──────────────────┘
+                                              │ mysqli
+                                              ▼
+                                     ┌───────────────────────────┐
+                                     │  MySQL: student_db        │
+                                     │     └── students          │
+                                     └───────────────────────────┘</div>
+
+<h3>4.2 Request lifecycle</h3>
+<p>Every request follows the same five steps:</p>
+<ol>
+  <li>Apache maps the URL to a <code>.php</code> file and hands it to the PHP interpreter.</li>
+  <li>The script includes <code>connection.php</code>, which opens a fresh MySQL connection. <em>Each request opens its own connection; nothing is pooled or reused.</em></li>
+  <li>The script inspects <code>$_SERVER['REQUEST_METHOD']</code>, <code>$_GET</code> and <code>$_POST</code> to decide what to do.</li>
+  <li>It builds an SQL string, executes it through <code>mysqli_query()</code>, and reads the result.</li>
+  <li>It either sends a <code>Location:</code> redirect (write operations) or echoes HTML (read operations).</li>
+</ol>
+<div class="callout">
+  <p><strong>Post/Redirect/Get is correctly applied.</strong> After a successful <code>INSERT</code>, <code>UPDATE</code>
+  or <code>DELETE</code>, the code calls <code>header("Location: table.php"); exit();</code>. This prevents the
+  browser from re-submitting the form on refresh and duplicating records. It is the strongest design decision
+  in the codebase and should be preserved through any refactor.</p>
+</div>
+
+<h3>4.3 Navigation map</h3>
+<table>
+  <tr><th style="width:34%">URL</th><th style="width:12%">Method</th><th>Outcome</th></tr>
+  <tr><td><code>form.php</code></td><td>GET</td><td>Shows the empty registration form.</td></tr>
+  <tr><td><code>form.php</code></td><td>POST</td><td>Inserts the student, redirects to <code>table.php</code>.</td></tr>
+  <tr><td><code>table.php</code></td><td>GET</td><td>Lists students. Accepts <code>?page=</code>, <code>?sort=</code>, <code>?order=</code>, <code>?search=</code>.</td></tr>
+  <tr><td><code>update.php?id=N</code></td><td>GET</td><td>Shows the edit form filled with student <code>N</code>.</td></tr>
+  <tr><td><code>update.php</code></td><td>POST</td><td>Updates the student, redirects to <code>table.php</code>.</td></tr>
+  <tr><td><code>delete.php?id=N</code></td><td>GET</td><td>Deletes student <code>N</code>, redirects to <code>table.php</code>. <span class="sev high">See 9.2</span></td></tr>
+  <tr><td><code>export.php</code></td><td>GET</td><td>Downloads <code>students.csv</code> containing every record.</td></tr>
+</table>
+
+<!-- ============ 5 ============ -->
+<h2 class="page-break">5. Database Design</h2>
+
+<h3>5.1 Reconstructed schema</h3>
+<div class="callout warn">
+  <p>The repository contains <strong>no <code>.sql</code> schema file and no migrations</strong>. The structure
+  below was reconstructed by reading every query in the codebase. Shipping an authoritative
+  <code>database/schema.sql</code> is the single highest-value addition you can make to this repository
+  — without it, no one can recreate the database.</p>
+</div>
+<p>Evidence used for the reconstruction:</p>
+<ul>
+  <li><code>form.php</code> inserts into <code>students(first_name, last_name, email, telephone)</code> — four user-supplied columns.</li>
+  <li><code>update.php</code> and <code>delete.php</code> filter on <code>id</code> after <code>intval()</code>, so <code>id</code> is an integer key.</li>
+  <li><code>table.php</code> whitelists exactly <code>['id','first_name','last_name','email','telephone']</code> as sortable columns — that is the full column list.</li>
+  <li><code>export.php</code> writes the header row <code>ID, First Name, Last Name, Email, Telephone</code> and then dumps <code>SELECT *</code> rows directly, which only lines up if the physical column order is <code>id, first_name, last_name, email, telephone</code>.</li>
+</ul>
+
+<h3>5.2 Recommended DDL</h3>
+<pre><code>CREATE DATABASE IF NOT EXISTS student_db
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+
+USE student_db;
+
+CREATE TABLE students (
+    id         INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    first_name VARCHAR(50)  NOT NULL,
+    last_name  VARCHAR(50)  NOT NULL,
+    email      VARCHAR(150) NOT NULL,
+    telephone  VARCHAR(20)  NOT NULL,
+    created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
+                            ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_students_email (email),
+    KEY idx_students_last_first (last_name, first_name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;</code></pre>
+
+<h3>5.3 Data integrity notes</h3>
+<table>
+  <tr><th style="width:26%">Concern</th><th>Analysis</th></tr>
+  <tr><td>Duplicate emails</td><td>Nothing in the PHP checks for an existing email before inserting. The same student can be registered any number of times. A <code>UNIQUE</code> constraint on <code>email</code> enforces this at the database level, which is the correct place — application checks alone are subject to race conditions.</td></tr>
+  <tr><td>Telephone as <code>VARCHAR</code></td><td>Correct, and deliberately so. Cameroonian numbers are written with a leading <code>+237</code> and may carry spaces; an integer column would destroy both. Never store phone numbers as numeric types.</td></tr>
+  <tr><td>Character set</td><td><code>connection.php</code> never calls <code>$conn-&gt;set_charset('utf8mb4')</code>. Two consequences: accented characters common in Cameroonian names (<em>é</em>, <em>ô</em>, <em>ç</em>) may be mangled, and <code>mysqli_real_escape_string()</code> escapes according to the wrong charset, which weakens the project's only injection defence.</td></tr>
+  <tr><td>Indexing</td><td>Sorting is currently permitted on all five columns but only <code>id</code> is indexed. <code>ORDER BY last_name</code> over a large table causes a filesort. The composite index above covers the common alphabetical listing.</td></tr>
+  <tr><td>Search performance</td><td>The search uses <code>LIKE '%term%'</code>. A leading wildcard cannot use a B-tree index, so every search is a full table scan. Acceptable at a few thousand rows; at school scale, move to a <code>FULLTEXT</code> index.</td></tr>
+  <tr><td>Audit trail</td><td>There is no <code>created_at</code>/<code>updated_at</code> today, so it is impossible to know when a student was registered. The DDL above adds both.</td></tr>
+</table>
+
+<!-- ============ 6 ============ -->
+<h2 class="page-break">6. Feature Walkthrough</h2>
+
+<h3>6.1 Create — <code>form.php</code></h3>
+<p>The file serves both the form and its handler. The method check at the top decides which:</p>
+<pre><code>if ($_SERVER['REQUEST_METHOD'] == "POST") {
+    $first_name = mysqli_real_escape_string($conn, $_POST['first_name']);
+    // ... last_name, email, telephone
+    $sql = "INSERT INTO students(first_name, last_name, email, telephone)
+            VALUES('$first_name', '$last_name', '$email', '$telephone')";
+    if (mysqli_query($conn, $sql)) {
+        header("Location: table.php");
+        exit();
+    } else {
+        echo mysqli_error($conn);
+    }
+}</code></pre>
+<p>Validation is entirely client-side: <code>required</code> attributes and <code>type="email"</code> /
+<code>type="tel"</code>. Those are usability features, not security controls — any client that sends a raw
+POST bypasses them completely. There is no server-side validation at all.</p>
+<p>Note also that the failure branch echoes <code>mysqli_error($conn)</code> straight to the page, leaking the
+raw database error (table names, column names, constraint names) to whoever triggered it. The same pattern
+appears in <code>update.php</code> and <code>delete.php</code>.</p>
+
+<h3>6.2 Read — <code>table.php</code></h3>
+<p>Four concerns are handled in sequence:</p>
+
+<h4>Pagination</h4>
+<pre><code>$limit  = 15;
+$page   = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 1;
+$offset = ($page - 1) * $limit;</code></pre>
+
+<h4>Sorting</h4>
+<p>This is handled correctly and is worth highlighting as good practice:</p>
+<pre><code>$validColumns = ['id','first_name','last_name','email','telephone'];
+$sort  = isset($_GET['sort']) && in_array($_GET['sort'], $validColumns) ? $_GET['sort'] : 'first_name';
+$order = isset($_GET['order']) && $_GET['order'] === 'DESC' ? 'DESC' : 'ASC';</code></pre>
+<p>Column and direction names cannot be parameterised by a prepared statement — they are part of the SQL
+grammar, not values. A whitelist is the correct defence, and the code applies it properly with a safe default.
+Keep this pattern when the rest of the file is migrated to prepared statements.</p>
+
+<h4>Search</h4>
+<p>If <code>?search=</code> is present and non-empty, the base query is replaced by a four-column
+<code>LIKE</code> query. The term is escaped with <code>mysqli_real_escape_string()</code>.</p>
+
+<h4>Rendering</h4>
+<p>Output is escaped with <code>htmlspecialchars()</code> on every cell and on the search box's echoed value,
+which blocks stored and reflected XSS on those paths. <code>sortLink()</code> builds the column header links and
+flips the direction when the same column is clicked twice.</p>
+
+<h3>6.3 Update — <code>update.php</code></h3>
+<p>The <code>GET</code> branch loads the record; the <code>POST</code> branch writes it back, taking the row
+identifier from a hidden <code>&lt;input name="id"&gt;</code>. Both branches use <code>intval()</code> on the id,
+which makes the <code>WHERE id = $id</code> clause safe. The four text fields use the same escaping as
+<code>form.php</code>. See section 10.3 for a real bug in the failure path of this file.</p>
+
+<h3>6.4 Delete — <code>delete.php</code></h3>
+<pre><code>if (isset($_GET['id'])) {
+    $id  = intval($_GET['id']);
+    $sql = "DELETE FROM students WHERE id = $id";
+    if (mysqli_query($conn, $sql)) { header("Location: table.php"); exit(); }
+}</code></pre>
+<p>The <code>confirm()</code> dialog in <code>table.php</code> is a convenience for the user, nothing more. The
+deletion is a <code>GET</code> request, which is a significant design flaw — see section 9.2.</p>
+
+<h3>6.5 Export — <code>export.php</code></h3>
+<p>The script sets <code>Content-Type: text/csv</code> and <code>Content-Disposition: attachment</code>, then
+streams rows through <code>php://output</code> rather than buffering the whole file in memory — the right
+approach for a growing dataset.</p>
+<div class="callout warn">
+  <p><strong>Hidden coupling.</strong> The header row is written by hand as
+  <code>['ID','First Name','Last Name','Email','Telephone']</code>, but the data rows come from
+  <code>SELECT *</code>. The two only line up while the physical column order matches. The moment someone adds a
+  <code>created_at</code> column, every exported row silently gains a value with no matching header. Select the
+  columns explicitly instead of using <code>*</code>.</p>
+</div>
+
+<!-- ============ 7 ============ -->
+<h2 class="page-break">7. Front-End &amp; Styling</h2>
+<p><code>style.css</code> defines a clean, consistent visual language: a light grey page background
+(<code>#f4f6f9</code>), a white card with a 12px radius and a soft shadow for forms, a primary blue
+(<code>#007bff</code>) for headings, buttons and table headers, zebra-striped rows, hover highlighting and
+focus rings on inputs. It is well written for its size.</p>
+
+<h3>Issues in the current front-end</h3>
+<table>
+  <tr><th style="width:30%">Issue</th><th>Detail</th></tr>
+  <tr><td>Inline styles override the stylesheet</td><td><code>table.php</code> links <code>style.css</code> and then declares an inline <code>&lt;style&gt;</code> block. Because it comes later, the inline rules win: the carefully styled blue table header and striped rows in <code>style.css</code> are replaced by a plain grey <code>#f4f4f4</code> header. The table page does not look like the rest of the app. Delete the inline block.</td></tr>
+  <tr><td>Invalid button markup</td><td><code>&lt;button color="blue"&gt;&lt;a href="form.php"&gt;…&lt;/a&gt;&lt;/button&gt;</code> nests a link inside a button, which is invalid HTML and behaves unpredictably. <code>color</code> is not a valid attribute. Use <code>&lt;a href="form.php" class="btn"&gt;</code> and style <code>.btn</code> in CSS.</td></tr>
+  <tr><td><code>update.php</code> is unstyled</td><td>It never links <code>style.css</code>, so the edit form renders as raw browser-default HTML while every other page is themed.</td></tr>
+  <tr><td>No responsive behaviour</td><td><code>.container</code> is a fixed <code>width: 400px</code> and the table has no horizontal scroll wrapper. On a phone — the dominant access device in Cameroon — the form overflows and the table is cut off. Use <code>max-width: 400px</code> and wrap the table in a container with <code>overflow-x: auto</code>.</td></tr>
+  <tr><td>Accessibility</td><td><code>&lt;label for="..."&gt;</code> is present in <code>form.php</code> but the matching inputs have no <code>id</code> attribute, so the association never happens and screen readers cannot announce the fields. Add <code>id</code> to each input.</td></tr>
+</table>
+
+<!-- ============ 8 ============ -->
+<h2>8. Installation &amp; Local Setup (XAMPP)</h2>
+<ol>
+  <li><strong>Install XAMPP</strong> and start <em>Apache</em> and <em>MySQL</em> from the control panel.</li>
+  <li><strong>Clone into the web root:</strong>
+    <pre><code>cd C:\xampp\htdocs
+git clone https://github.com/tebitramson69-netizen/Student_registration.git</code></pre></li>
+  <li><strong>Create the database.</strong> Open <code>http://localhost/phpmyadmin</code>, create a database named
+      <code>student_db</code>, and run the DDL from section 5.2 in the SQL tab.</li>
+  <li><strong>Check the credentials</strong> in <code>connection.php</code>. The XAMPP defaults
+      (<code>root</code> / empty password) already match.</li>
+  <li><strong>Open the application:</strong> <code>http://localhost/Student_registration/form.php</code>
+      <br><span class="small">There is no <code>index.php</code>, so the directory root will show a file listing rather than the app.</span></li>
+</ol>
+<div class="callout">
+  <p><strong>Verification checklist:</strong> register a student → confirm the redirect lands on
+  <code>table.php</code> with the new row visible → click a column header and confirm the sort direction flips →
+  search for part of the name → click <em>Update</em>, change a field, save → click <em>Download CSV</em> and open
+  the file. If all six work, the environment is correct.</p>
+</div>
+
+<!-- ============ 9 ============ -->
+<h2 class="page-break">9. Security Review</h2>
+<p>Findings are ordered by severity. Each states the root cause before the fix, because understanding why a
+class of bug exists prevents reintroducing it elsewhere.</p>
+
+<h3>9.1 <span class="sev crit">CRITICAL</span> No authentication or authorisation</h3>
+<p><strong>Root cause:</strong> no session layer was ever built. Not one file calls <code>session_start()</code>.</p>
+<p><strong>Impact:</strong> anyone who can reach the URL can list every student, edit any record, delete any
+record, and download the complete register from <code>export.php</code> — full personal data of every student,
+including emails and phone numbers, with a single unauthenticated GET request. On a local XAMPP install this is
+contained; the moment it is deployed, it is a data breach.</p>
+<p><strong>Fix:</strong> add an <code>admin_users</code> table with <code>password_hash()</code>-stored
+credentials, a <code>login.php</code>, and an <code>auth.php</code> guard included at the top of every protected
+page that redirects to the login screen when <code>$_SESSION['user_id']</code> is absent. This is prerequisite
+work for anything else — build it before adding features.</p>
+
+<h3>9.2 <span class="sev high">HIGH</span> Destructive action exposed over GET (CSRF)</h3>
+<p><strong>Root cause:</strong> <code>delete.php</code> performs a state change in response to a GET request, and
+no CSRF token is verified anywhere in the project.</p>
+<p><strong>Impact:</strong> HTTP GET is defined as a safe, idempotent method; browsers, link prefetchers, chat
+previews and crawlers follow GET links freely. An <code>&lt;img src="http://.../delete.php?id=5"&gt;</code>
+embedded in any page an authenticated administrator visits deletes student 5 silently. The
+<code>confirm()</code> dialog offers no protection — it is client-side and is never executed in that scenario.</p>
+<p><strong>Fix:</strong> convert deletion to a <code>POST</code> form, and verify a per-session CSRF token on
+every state-changing request:</p>
+<pre><code>// on render
+$_SESSION['csrf'] ??= bin2hex(random_bytes(32));
+echo '&lt;input type="hidden" name="csrf" value="' . $_SESSION['csrf'] . '"&gt;';
+
+// on submit
+if (!hash_equals($_SESSION['csrf'] ?? '', $_POST['csrf'] ?? '')) {
+    http_response_code(403);
+    exit('Invalid request.');
+}</code></pre>
+
+<h3>9.3 <span class="sev high">HIGH</span> String-concatenated SQL instead of prepared statements</h3>
+<p><strong>Root cause:</strong> every query is assembled by interpolating variables into a string. The defence
+relied upon is <code>mysqli_real_escape_string()</code>.</p>
+<p><strong>Current status:</strong> to be fair to the code, the escaping is applied consistently and
+<code>intval()</code> guards every id, so no <em>immediately exploitable</em> injection was found. But this is a
+fragile position, for three reasons:</p>
+<ul>
+  <li>It depends on a developer remembering to escape <em>every</em> variable, <em>every</em> time. One omission is a full compromise.</li>
+  <li><code>mysqli_real_escape_string()</code> escapes according to the connection charset, and <code>connection.php</code> never sets one (section 5.3). Charset mismatches are a known route around this function.</li>
+  <li>It offers no protection when a value lands outside quotes in the SQL string.</li>
+</ul>
+<p><strong>Fix:</strong> prepared statements everywhere. The rewrite of <code>form.php</code>:</p>
+<pre><code>$stmt = $conn-&gt;prepare(
+    "INSERT INTO students (first_name, last_name, email, telephone)
+     VALUES (?, ?, ?, ?)"
+);
+$stmt-&gt;bind_param("ssss", $first_name, $last_name, $email, $telephone);
+$stmt-&gt;execute();
+$stmt-&gt;close();</code></pre>
+<p>Values are then sent to MySQL separately from the SQL text and can never be parsed as SQL. Keep the
+<code>$validColumns</code> whitelist for <code>ORDER BY</code> — identifiers still cannot be bound.</p>
+
+<h3>9.4 <span class="sev med">MEDIUM</span> No server-side validation</h3>
+<p><strong>Root cause:</strong> validation exists only as HTML5 attributes.</p>
+<p><strong>Impact:</strong> a crafted POST stores an empty name, a 10,000-character string, or
+<code>"not-an-email"</code> in the email column. Data quality degrades silently.</p>
+<p><strong>Fix:</strong> validate on the server before touching the database —
+<code>trim()</code>, length bounds, <code>filter_var($email, FILTER_VALIDATE_EMAIL)</code>, and a telephone
+pattern appropriate to the target region (for Cameroon, <code>/^(\+237)?6[5-9][0-9]{7}$/</code> covers current
+mobile numbering). Re-render the form with the submitted values and the error messages rather than discarding
+the user's input.</p>
+
+<h3>9.5 <span class="sev med">MEDIUM</span> Database errors printed to the browser</h3>
+<p><strong>Root cause:</strong> <code>echo mysqli_error($conn)</code> in three files, plus
+<code>die("Connection failed: " . $conn-&gt;connect_error)</code> in <code>connection.php</code>.</p>
+<p><strong>Impact:</strong> schema details, file paths and server configuration are disclosed to an attacker,
+who gets a free map of the database.</p>
+<p><strong>Fix:</strong> log the real error with <code>error_log()</code> and show the user a neutral message.
+In production set <code>display_errors = Off</code> and <code>log_errors = On</code>.</p>
+
+<h3>9.6 <span class="sev med">MEDIUM</span> CSV formula injection in <code>export.php</code></h3>
+<p><strong>Root cause:</strong> field values are written to the CSV without neutralising leading
+<code>=</code>, <code>+</code>, <code>-</code> or <code>@</code>.</p>
+<p><strong>Impact:</strong> a student registered with the name <code>=HYPERLINK("http://evil","Click")</code> is
+stored harmlessly, but when an administrator opens the export in Excel or LibreOffice the cell is evaluated as a
+formula. This is a stored attack that fires inside the victim's spreadsheet application, not in the browser.</p>
+<p><strong>Fix:</strong> prefix any value beginning with those characters with a single quote before writing it.</p>
+
+<h3>9.7 <span class="sev low">LOW</span> Credentials committed to the repository</h3>
+<p><strong>Root cause:</strong> <code>connection.php</code> hard-codes host, user, password and database name, and
+the file is tracked by Git.</p>
+<p><strong>Impact:</strong> harmless today (empty XAMPP default), but the pattern guarantees that a real
+production password will eventually be committed and published.</p>
+<p><strong>Fix:</strong> move the values into an untracked <code>config.php</code> (or environment variables),
+commit a <code>config.example.php</code> with placeholders, and add <code>config.php</code> to a
+<code>.gitignore</code> — the repository currently has none.</p>
+
+<h3>Security scorecard</h3>
+<table>
+  <tr><th style="width:38%">Control</th><th style="width:16%">Status</th><th>Comment</th></tr>
+  <tr><td>Authentication</td><td><span class="sev crit">Absent</span></td><td>No session layer at all.</td></tr>
+  <tr><td>Authorisation / roles</td><td><span class="sev crit">Absent</span></td><td>No concept of a user.</td></tr>
+  <tr><td>CSRF protection</td><td><span class="sev high">Absent</span></td><td>Deletes are GET requests.</td></tr>
+  <tr><td>SQL injection defence</td><td><span class="sev med">Partial</span></td><td>Escaping + <code>intval()</code>; no prepared statements.</td></tr>
+  <tr><td>XSS defence (output)</td><td><span class="sev low">Good</span></td><td><code>htmlspecialchars()</code> applied consistently in <code>table.php</code> and <code>update.php</code>.</td></tr>
+  <tr><td><code>ORDER BY</code> whitelist</td><td><span class="sev low">Good</span></td><td>Correct approach, safe default.</td></tr>
+  <tr><td>Post/Redirect/Get</td><td><span class="sev low">Good</span></td><td>Applied after every write.</td></tr>
+  <tr><td>Server-side validation</td><td><span class="sev med">Absent</span></td><td>Client-side only.</td></tr>
+  <tr><td>Error handling</td><td><span class="sev med">Weak</span></td><td>Raw database errors are echoed.</td></tr>
+</table>
+
+<!-- ============ 10 ============ -->
+<h2 class="page-break">10. Known Bugs &amp; Root-Cause Analysis</h2>
+
+<h3>10.1 <span class="sev high">HIGH</span> Pagination is wrong whenever a search is active</h3>
+<p><strong>Where:</strong> <code>table.php</code> lines 37–40.</p>
+<pre><code>$countResult = mysqli_query($conn, "SELECT COUNT(*) AS total FROM students");
+$totalRows   = mysqli_fetch_assoc($countResult)['total'];
+$totalPages  = ceil($totalRows / $limit);</code></pre>
+<p><strong>Root cause:</strong> the count query is unconditional. It counts every row in the table, while the
+list query above it may have been narrowed by a <code>LIKE</code> filter. The two queries disagree about what
+"the result set" is.</p>
+<p><strong>Observable symptom:</strong> with 100 students, searching for a term that matches 3 of them still
+renders 7 page links. Pages 2 through 7 are empty.</p>
+<p><strong>Fix:</strong> build the <code>WHERE</code> clause once and apply it to both the <code>SELECT</code>
+and the <code>COUNT(*)</code>. Restructuring the file so the filter is a single variable used by both queries
+also removes the duplicated SQL.</p>
+
+<h3>10.2 <span class="sev med">MEDIUM</span> A negative or zero page number breaks the listing</h3>
+<p><strong>Where:</strong> <code>table.php</code> line 8.</p>
+<p><strong>Root cause:</strong> <code>is_numeric('-3')</code> returns <code>true</code>, so <code>$page</code>
+becomes <code>-3</code> and <code>$offset</code> becomes <code>-60</code>. MySQL rejects a negative
+<code>OFFSET</code>, <code>mysqli_query()</code> returns <code>false</code>, and
+<code>mysqli_fetch_all(false, …)</code> then raises a fatal error. The same happens with <code>?page=0</code>.</p>
+<p><strong>Fix:</strong> clamp the value — <code>$page = max(1, (int)($_GET['page'] ?? 1));</code> — and, once
+<code>$totalPages</code> is known, clamp the upper bound too.</p>
+
+<h3>10.3 <span class="sev med">MEDIUM</span> <code>update.php</code> crashes on a failed update or a missing id</h3>
+<p><strong>Where:</strong> <code>update.php</code> lines 4–9 and 41–53.</p>
+<p><strong>Root cause:</strong> <code>$student</code> is only populated inside <code>if (isset($_GET['id']))</code>.
+The HTML below always runs and always dereferences <code>$student['id']</code>. Two paths reach it undefined:</p>
+<ul>
+  <li>A <code>POST</code> whose <code>UPDATE</code> fails — the code echoes the error, does <em>not</em> exit, and falls through to the form. <code>$student</code> was never set, because there is no <code>$_GET['id']</code> on a POST.</li>
+  <li>A GET with a non-existent id — <code>mysqli_fetch_assoc()</code> returns <code>null</code>, and on PHP 8.1+ <code>htmlspecialchars(null)</code> is deprecated; accessing <code>null['id']</code> is a warning that renders an empty form with no id.</li>
+</ul>
+<p><strong>Fix:</strong> after the fetch, guard explicitly — if no record was found, redirect back to
+<code>table.php</code> (or render a "student not found" message) and <code>exit()</code>. On the POST failure
+path, redirect back to <code>update.php?id=$id</code> with the error rather than falling through.</p>
+
+<h3>10.4 <span class="sev low">LOW</span> Searching for "0" returns everything</h3>
+<p><strong>Where:</strong> <code>table.php</code> line 22 — <code>!empty($_GET['search'])</code>.</p>
+<p><strong>Root cause:</strong> in PHP, the string <code>"0"</code> is falsy, so <code>empty("0")</code> is
+<code>true</code> and the search branch is skipped. This is one of PHP's classic type-juggling traps.</p>
+<p><strong>Fix:</strong> test the string explicitly:
+<code>if (isset($_GET['search']) &amp;&amp; trim($_GET['search']) !== '')</code>.</p>
+
+<h3>10.5 <span class="sev low">LOW</span> The export header row can drift from the data</h3>
+<p>Covered in section 6.5. Replace <code>SELECT *</code> with an explicit column list.</p>
+
+<h3>10.6 <span class="sev low">LOW</span> Pagination renders every page as a link</h3>
+<p><strong>Where:</strong> <code>table.php</code> lines 122–127.</p>
+<p><strong>Root cause:</strong> the loop runs from <code>1</code> to <code>$totalPages</code> with no window.
+At 3,000 students that is 200 links on every page load.</p>
+<p><strong>Fix:</strong> render a sliding window (first, last, and a few pages either side of the current one).</p>
+
+<h3>Fix priority</h3>
+<table>
+  <tr><th style="width:8%">Order</th><th style="width:42%">Item</th><th>Reason</th></tr>
+  <tr><td>1</td><td>Add authentication (9.1)</td><td>Everything else is meaningless while the data is public.</td></tr>
+  <tr><td>2</td><td>POST + CSRF tokens for delete/update (9.2)</td><td>Prevents silent destructive requests.</td></tr>
+  <tr><td>3</td><td>Prepared statements across all files (9.3)</td><td>Removes a whole bug class permanently.</td></tr>
+  <tr><td>4</td><td>Fix search pagination (10.1)</td><td>Visible, daily-use functional bug.</td></tr>
+  <tr><td>5</td><td>Clamp page / guard <code>$student</code> (10.2, 10.3)</td><td>Crashes on ordinary inputs.</td></tr>
+  <tr><td>6</td><td>Server-side validation (9.4)</td><td>Protects long-term data quality.</td></tr>
+  <tr><td>7</td><td>Commit <code>schema.sql</code> + <code>.gitignore</code> (5.1, 9.7)</td><td>Makes the project reproducible.</td></tr>
+  <tr><td>8</td><td>Front-end cleanup (section 7)</td><td>Consistency and mobile usability.</td></tr>
+</table>
+
+<!-- ============ 11 ============ -->
+<h2 class="page-break">11. Continuous Integration — Current State</h2>
+<p>The repository contains <code>.github/workflows/laravel.yml</code>, added from GitHub's starter-workflow
+gallery. It does not correspond to this project:</p>
+<table>
+  <tr><th style="width:44%">Workflow step</th><th>Why it fails here</th></tr>
+  <tr><td><code>copy('.env.example', '.env')</code></td><td>Neither file exists in this repository.</td></tr>
+  <tr><td><code>composer install</code></td><td>There is no <code>composer.json</code> — the project has no dependencies.</td></tr>
+  <tr><td><code>php artisan key:generate</code></td><td><code>artisan</code> is a Laravel console script. This is not a Laravel project.</td></tr>
+  <tr><td><code>chmod -R 777 storage bootstrap/cache</code></td><td>Neither directory exists.</td></tr>
+  <tr><td><code>php artisan test</code></td><td>There is no test suite of any kind.</td></tr>
+</table>
+<p><strong>Recommendation:</strong> replace it with a workflow that does something meaningful for a plain PHP
+project — a syntax check across every file, which catches parse errors before they are merged:</p>
+<pre><code>name: PHP Lint
+on: [push, pull_request]
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+      - name: Syntax check all PHP files
+        run: find . -name "*.php" -print0 | xargs -0 -n1 php -l</code></pre>
+<p>Once validation logic is extracted into functions, add PHPUnit and test those functions directly. Testing is
+impossible while logic and HTML share a file — which is itself a strong argument for the refactor in section 12.</p>
+
+<!-- ============ 12 ============ -->
+<h2>12. Improvement Roadmap</h2>
+<p>Three phases, ordered so that each one rests on the previous. Do not start phase 3 before phase 1 is complete.</p>
+
+<h3>Phase 1 — Harden what exists</h3>
+<ul>
+  <li>Sessions, login, logout, password hashing with <code>password_hash()</code> / <code>password_verify()</code>.</li>
+  <li>An <code>auth.php</code> guard included at the top of every protected page.</li>
+  <li>Prepared statements throughout; <code>set_charset('utf8mb4')</code> in the connection.</li>
+  <li>CSRF tokens; delete converted to <code>POST</code>.</li>
+  <li>Server-side validation with errors re-rendered into the form.</li>
+  <li><code>database/schema.sql</code>, <code>.gitignore</code>, and credentials moved out of version control.</li>
+  <li>Fix bugs 10.1 – 10.4.</li>
+</ul>
+
+<h3>Phase 2 — Restructure for growth</h3>
+<ul>
+  <li>Add <code>index.php</code> as a proper entry point.</li>
+  <li>Introduce <code>includes/header.php</code> and <code>includes/footer.php</code> so navigation and the
+      stylesheet link live in one place instead of being duplicated per file.</li>
+  <li>Move data access into functions (<code>getStudents()</code>, <code>findStudent()</code>,
+      <code>createStudent()</code>, <code>updateStudent()</code>, <code>deleteStudent()</code>) in a
+      <code>students.php</code> model file, so pages stop writing SQL directly. This single change is what makes
+      the codebase testable.</li>
+  <li>Switch to PDO, or at least settle on one <code>mysqli</code> style — the code currently mixes the
+      object-oriented constructor with procedural query calls.</li>
+  <li>Make the layout responsive; consolidate the two stylesheets into one.</li>
+</ul>
+
+<h3>Phase 3 — Become a school management system</h3>
+<p>Only at this point does the "school management" name become accurate. Suggested entity model:</p>
+<div class="ascii">students ──&lt; enrollments &gt;── classes ──&lt; class_subjects &gt;── subjects
+    │                            │
+    │                            └── teachers
+    ├──&lt; attendance
+    ├──&lt; grades       (student_id, subject_id, term, score)
+    └──&lt; fee_payments (student_id, term, amount, paid_at, method)
+
+users (id, username, password_hash, role)   role ∈ {admin, teacher, secretary}</div>
+<p>Build these one module at a time, each with its own CRUD, each behind the authorisation layer from phase 1.
+For a Cameroonian deployment, two things deserve early attention: bilingual (English/French) labels, and Mobile
+Money reconciliation in the fees module — both are far easier to design in from the start than to retrofit.</p>
+
+<!-- ============ APPENDIX A ============ -->
+<h2 class="page-break">Appendix A — Query Reference</h2>
+<p>Every SQL statement in the codebase, in one place.</p>
+<table>
+  <tr><th style="width:24%">File</th><th>Statement</th></tr>
+  <tr><td><code>form.php</code></td><td><code>INSERT INTO students(first_name, last_name, email, telephone) VALUES(…)</code></td></tr>
+  <tr><td><code>table.php</code> (list)</td><td><code>SELECT * FROM students ORDER BY {sort} {order} LIMIT {limit} OFFSET {offset}</code></td></tr>
+  <tr><td><code>table.php</code> (search)</td><td><code>SELECT * FROM students WHERE first_name LIKE '%…%' OR last_name LIKE '%…%' OR email LIKE '%…%' OR telephone LIKE '%…%' ORDER BY {sort} {order} LIMIT … OFFSET …</code></td></tr>
+  <tr><td><code>table.php</code> (count)</td><td><code>SELECT COUNT(*) AS total FROM students</code> &nbsp;<span class="sev med">bug 10.1</span></td></tr>
+  <tr><td><code>update.php</code> (load)</td><td><code>SELECT * FROM students WHERE id = {id}</code></td></tr>
+  <tr><td><code>update.php</code> (save)</td><td><code>UPDATE students SET first_name=…, last_name=…, email=…, telephone=… WHERE id={id}</code></td></tr>
+  <tr><td><code>delete.php</code></td><td><code>DELETE FROM students WHERE id = {id}</code></td></tr>
+  <tr><td><code>export.php</code></td><td><code>SELECT * FROM students ORDER BY first_name ASC, last_name ASC</code></td></tr>
+</table>
+
+<!-- ============ APPENDIX B ============ -->
+<h2>Appendix B — Glossary</h2>
+<table>
+  <tr><th style="width:26%">Term</th><th>Meaning in this project</th></tr>
+  <tr><td>CRUD</td><td>Create, Read, Update, Delete — the four operations this application implements over the <code>students</code> table.</td></tr>
+  <tr><td>Post/Redirect/Get</td><td>Responding to a successful POST with a redirect, so refreshing the page does not resubmit the form. Used after every write here.</td></tr>
+  <tr><td>Prepared statement</td><td>An SQL statement sent to the database with placeholders, whose values are transmitted separately and therefore can never be interpreted as SQL. Not yet used in this project.</td></tr>
+  <tr><td>CSRF</td><td>Cross-Site Request Forgery — making a logged-in user's browser issue a state-changing request without their intent. <code>delete.php</code> is currently vulnerable.</td></tr>
+  <tr><td>XSS</td><td>Cross-Site Scripting — injecting script through stored or reflected data. Mitigated here by <code>htmlspecialchars()</code> on output.</td></tr>
+  <tr><td>Offset pagination</td><td>Fetching a page of rows with <code>LIMIT</code> and <code>OFFSET</code>. Simple, and what <code>table.php</code> uses.</td></tr>
+  <tr><td>Page controller</td><td>The architectural pattern where each URL maps to one file that handles logic and rendering together.</td></tr>
+  <tr><td>Formula injection</td><td>A stored value beginning with <code>=</code>, <code>+</code>, <code>-</code> or <code>@</code> that a spreadsheet program evaluates as a formula when the exported CSV is opened.</td></tr>
+</table>
+
+<p class="small" style="margin-top:30px; border-top:1px solid #c9d4e0; padding-top:8px">
+Document generated for the <code>Student_registration</code> repository. Every statement about the code was
+verified against the source at commit <code>4d11f42</code>. Where a file, table or feature does not exist, this
+document says so explicitly rather than describing an assumed implementation.</p>
+
+</body>
+</html>
