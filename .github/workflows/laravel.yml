@@ -1,0 +1,74 @@
+name: Laravel
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  laravel-tests:
+
+    runs-on: ubuntu-latest
+
+    # The Laravel application lives in studio/; the repository root holds the
+    # original student-registration project, which has no composer.json. Without
+    # this the workflow fails at `composer install` before running anything.
+    defaults:
+      run:
+        working-directory: studio
+
+    strategy:
+      fail-fast: true
+      matrix:
+        php: ['8.3', '8.4']
+
+    name: PHP ${{ matrix.php }}
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        persist-credentials: false
+
+    - uses: shivammathur/setup-php@v2
+      with:
+        # studio/composer.json requires ^8.3. The template's 8.0 could never
+        # have installed these dependencies.
+        php-version: ${{ matrix.php }}
+        extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, gd
+        coverage: none
+
+    # The end-to-end test renders real media and skips itself when ffmpeg is
+    # absent. Without this the most valuable test in the suite would pass by
+    # doing nothing.
+    - name: Install FFmpeg
+      run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      working-directory: .
+
+    - name: Copy .env
+      run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+
+    - name: Install Dependencies
+      run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+    - name: Generate key
+      run: php artisan key:generate
+
+    - name: Directory Permissions
+      run: chmod -R 777 storage bootstrap/cache
+
+    # phpunit.xml runs against an in-memory database; this only exists so a
+    # local run of the same workflow behaves the same way.
+    - name: Create Database
+      run: |
+        mkdir -p database
+        touch database/database.sqlite
+
+    - name: Execute tests (Unit and Feature tests) via PHPUnit/Pest
+      env:
+        DB_CONNECTION: sqlite
+        DB_DATABASE: database/database.sqlite
+      run: php artisan test
