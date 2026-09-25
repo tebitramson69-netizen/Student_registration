@@ -151,11 +151,16 @@ for (const w of widths) {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, colorScheme: 'light' });
   const page = await ctx.newPage();
   await page.goto(BASE + '/', { waitUntil: 'networkidle' });
-  const lightBg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+  const bg = () =>
+    page.evaluate(() => ({
+      page: getComputedStyle(document.documentElement).backgroundColor,
+      text: getComputedStyle(document.body).color,
+    }));
+  const lightBg = JSON.stringify(await bg());
   await page.click('#theme-toggle');
   await page.waitForTimeout(250);
-  const darkBg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-  if (lightBg === darkBg) problems.push(`THEME toggle did not change background (${lightBg})`);
+  const darkBg = JSON.stringify(await bg());
+  if (lightBg === darkBg) problems.push(`THEME toggle changed nothing (${lightBg})`);
   await page.reload({ waitUntil: 'networkidle' });
   const afterReload = await page.evaluate(() => document.documentElement.getAttribute('data-theme'));
   if (afterReload !== 'dark') problems.push(`THEME not persisted after reload (${afterReload})`);

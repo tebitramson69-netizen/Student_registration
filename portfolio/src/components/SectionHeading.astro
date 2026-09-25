@@ -3,26 +3,79 @@ interface Props {
   eyebrow: string;
   title: string;
   lead?: string;
+  /** Section number, e.g. "01". Editorial structure, not decoration. */
+  index?: string;
   /** Rendering level. Defaults to h2 — only the hero should be h1. */
   as?: 'h1' | 'h2';
   id?: string;
 }
-const { eyebrow, title, lead, as: Tag = 'h2', id } = Astro.props;
+const { eyebrow, title, lead, index, as: Tag = 'h2', id } = Astro.props;
 ---
-<div class="section-heading" data-reveal>
-  <p class="eyebrow">{eyebrow}</p>
-  <Tag id={id} class="section-heading__title">{title}</Tag>
-  {lead && <p class="section-heading__lead">{lead}</p>}
-</div>
+<header class="sh" data-reveal>
+  <hr class="rule sh__rule" />
+
+  <div class="sh__meta">
+    {index && <span class="sh__index" aria-hidden="true">{index}</span>}
+    <span class="meta sh__eyebrow">{eyebrow}</span>
+  </div>
+
+  <div class="sh__body">
+    <Tag id={id} class="sh__title">{title}</Tag>
+    {lead && <p class="sh__lead">{lead}</p>}
+  </div>
+</header>
 
 <style>
-  .section-heading { max-width: var(--width-prose); margin-bottom: var(--space-xl); }
-  .section-heading__title { margin-top: var(--space-2xs); }
-  .section-heading__lead {
-    margin-top: var(--space-s);
+  .sh { margin-bottom: var(--space-2xl); }
+
+  .sh__rule { margin-bottom: var(--space-s); }
+
+  .sh__meta {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-s);
+  }
+
+  /* The number is set in the display face and sized like body text: present,
+     and quietly confident rather than shouting. */
+  .sh__index {
+    font-family: var(--font-display);
+    font-size: var(--step--1);
+    font-weight: 500;
+    color: var(--accent-ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .sh__eyebrow { color: var(--text-subtle); }
+
+  /* Below 52em the title sits under the meta row. Above it, the meta row
+     becomes a margin note beside the title — the classic editorial column. */
+  .sh__body { margin-top: var(--space-m); }
+  .sh__title { max-width: 20ch; }
+
+  .sh__lead {
+    margin-top: var(--space-m);
     color: var(--text-muted);
     font-size: var(--step-1);
     line-height: 1.5;
-    max-width: 55ch;
+    max-width: 52ch;
+  }
+
+  @media (min-width: 52em) {
+    .sh {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 2.2fr);
+      column-gap: var(--space-xl);
+      align-items: start;
+    }
+    .sh__rule { grid-column: 1 / -1; }
+    .sh__meta {
+      flex-direction: column;
+      gap: var(--space-3xs);
+      align-items: flex-start;
+      position: sticky;
+      top: 6rem;
+    }
+    .sh__body { margin-top: 0; }
   }
 </style>

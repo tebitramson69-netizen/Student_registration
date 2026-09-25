@@ -6,114 +6,132 @@ import Icon from './Icon.astro';
 const year = new Date().getFullYear();
 ---
 <footer class="site-footer">
-  <div class="page site-footer__inner">
-    <div class="site-footer__identity">
-      <p class="site-footer__name">{profile.name}</p>
-      <p class="site-footer__role">{profile.role}</p>
-      <p class="site-footer__location">
-        <Icon name="location" size={14} />
-        {profile.location}
-      </p>
+  <div class="page">
+    <hr class="rule" />
+
+    <!-- The one thing a visitor at the bottom of the page might want: a way to
+         start a conversation. So it is the largest thing in the footer. -->
+    <div class="foot__cta">
+      <p class="meta">Get in touch</p>
+      <a class="foot__email sweep" href={`mailto:${profile.email}`}>{profile.email}</a>
     </div>
 
-    <nav class="site-footer__nav" aria-label="Footer">
-      <h2 class="site-footer__heading">Pages</h2>
-      <ul>
-        {nav.map((item) => (
-          <li><a href={url(item.href)}>{item.label}</a></li>
-        ))}
-      </ul>
-    </nav>
+    <div class="foot__cols">
+      <div class="foot__identity">
+        <p class="foot__name">{profile.name}</p>
+        <p class="foot__role">{profile.role}</p>
+        <p class="foot__loc meta">
+          <Icon name="location" size={13} />
+          {profile.location}
+        </p>
+      </div>
 
-    <div class="site-footer__nav">
-      <h2 class="site-footer__heading">Elsewhere</h2>
-      <ul>
-        {socials.map((social) => (
-          <li>
-            <a
-              href={social.href}
-              rel={social.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-              target={social.href.startsWith('http') ? '_blank' : undefined}
-            >
-              <Icon name={social.icon} size={15} />
-              {social.label}
-              {social.href.startsWith('http') && <span class="visually-hidden">(opens in a new tab)</span>}
-            </a>
-          </li>
-        ))}
-      </ul>
+      <nav class="foot__nav" aria-label="Footer">
+        <h2 class="meta foot__heading">Pages</h2>
+        <ul>
+          {nav.map((item) => (
+            <li><a class="sweep" href={url(item.href)}>{item.label}</a></li>
+          ))}
+        </ul>
+      </nav>
+
+      <div class="foot__nav">
+        <h2 class="meta foot__heading">Elsewhere</h2>
+        <ul>
+          {socials.map((social) => (
+            <li>
+              <a
+                class="sweep"
+                href={social.href}
+                rel={social.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                target={social.href.startsWith('http') ? '_blank' : undefined}
+              >
+                {social.label}
+                {social.href.startsWith('http') && (
+                  <span class="visually-hidden">(opens in a new tab)</span>
+                )}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
-  </div>
 
-  <div class="page site-footer__base">
-    <p>© {year} {profile.name}. All rights reserved.</p>
-    <p class="site-footer__colophon">Built with Astro. Written, designed and deployed by hand.</p>
+    <div class="foot__base">
+      <p>&copy; {year} {profile.name}</p>
+      <p class="foot__colophon">Fraunces &amp; Inter &middot; Built with Astro</p>
+    </div>
   </div>
 </footer>
 
 <style>
   .site-footer {
     margin-top: auto;
-    border-top: 1px solid var(--border);
     background: var(--bg-sunken);
     padding-block: var(--space-xl) var(--space-m);
   }
 
-  .site-footer__inner {
+  /* --- Oversized email --- */
+  .foot__cta { padding-block: var(--space-m) var(--space-2xl); }
+  .foot__email {
+    display: inline-block;
+    margin-top: var(--space-2xs);
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 1rem + 3.2vw, 3rem);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    color: var(--text);
+    /* Long addresses must not push the page sideways on a small phone. */
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+  .foot__email:hover { color: var(--accent-ink); }
+
+  /* --- Columns --- */
+  .foot__cols {
     display: grid;
     gap: var(--space-l);
-    grid-template-columns: 1fr;
+    padding-top: var(--space-l);
+    border-top: 1px solid var(--border);
   }
   @media (min-width: 40em) {
-    .site-footer__inner { grid-template-columns: 1.6fr 1fr 1fr; gap: var(--space-xl); }
+    .foot__cols { grid-template-columns: 1.8fr 1fr 1fr; gap: var(--space-xl); }
   }
 
-  .site-footer__name {
+  .foot__name {
     font-family: var(--font-display);
     font-size: var(--step-1);
     letter-spacing: var(--tracking-tight);
   }
-  .site-footer__role { color: var(--text-muted); font-size: var(--step--1); max-width: 32ch; }
-  .site-footer__location {
+  .foot__role { color: var(--text-muted); font-size: var(--step--1); max-width: 30ch; }
+  .foot__loc {
     display: flex;
     align-items: center;
-    gap: 0.35em;
+    gap: 0.4em;
     margin-top: var(--space-2xs);
-    color: var(--text-subtle);
-    font-size: var(--step--1);
   }
 
-  .site-footer__heading {
-    font-family: var(--font-mono);
-    font-size: var(--step--2);
-    font-weight: 500;
-    letter-spacing: var(--tracking-wide);
-    text-transform: uppercase;
-    color: var(--text-subtle);
-    margin-bottom: var(--space-2xs);
-  }
-  .site-footer__nav ul { list-style: none; padding: 0; display: grid; gap: 0.35rem; }
-  .site-footer__nav a {
+  .foot__heading { color: var(--text-subtle); margin-bottom: var(--space-2xs); }
+  .foot__nav ul { list-style: none; padding: 0; display: grid; gap: 0.3rem; }
+  .foot__nav a {
     display: inline-flex;
     align-items: center;
-    gap: 0.45em;
+    min-height: 24px;
     font-size: var(--step--1);
     color: var(--text-muted);
-    text-decoration: none;
-    padding-block: 0.25rem;
   }
-  .site-footer__nav a:hover { color: var(--text); text-decoration: underline; }
+  .foot__nav a:hover { color: var(--text); }
 
-  .site-footer__base {
+  .foot__base {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     gap: var(--space-2xs);
-    margin-top: var(--space-xl);
+    margin-top: var(--space-2xl);
     padding-top: var(--space-s);
     border-top: 1px solid var(--border);
     font-size: var(--step--2);
     color: var(--text-subtle);
   }
-  .site-footer__colophon { font-family: var(--font-mono); }
+  .foot__colophon { font-family: var(--font-mono); }
 </style>

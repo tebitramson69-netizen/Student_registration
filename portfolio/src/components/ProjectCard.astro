@@ -43,8 +43,9 @@ const shot = uploaded(data.image);
 
   <div class="card__body">
     <p class="card__meta">
+      <span class="card__index" aria-hidden="true">{String(data.order).padStart(2, '0')}</span>
       <span class="card__category">{data.category}</span>
-      <span aria-hidden="true">·</span>
+      <span aria-hidden="true">/</span>
       <span>{data.year}</span>
     </p>
 
@@ -101,6 +102,21 @@ const shot = uploaded(data.image);
     box-shadow: var(--shadow-l);
     transform: translateY(-3px);
   }
+  /* A hairline of accent slides across the top edge on hover. Cheap, and it
+     makes the card feel connected to the rest of the system. */
+  .card::before {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    height: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--duration-base) var(--ease-out);
+    z-index: 2;
+  }
+  .card:hover::before { transform: scaleX(1); }
   @media (prefers-reduced-motion: reduce) {
     .card:hover { transform: none; }
   }
@@ -166,6 +182,14 @@ const shot = uploaded(data.image);
     color: var(--text-subtle);
   }
   .card__category { color: var(--accent-ink); }
+  .card__index {
+    font-family: var(--font-display);
+    font-size: var(--step--1);
+    color: var(--text-subtle);
+    font-variant-numeric: tabular-nums;
+    text-transform: none;
+    letter-spacing: 0;
+  }
 
   .card__title { font-size: var(--step-2); }
   .card__title a {
@@ -173,7 +197,14 @@ const shot = uploaded(data.image);
     display: inline-flex;
     align-items: baseline;
     gap: 0.4em;
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0% 1px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size var(--duration-base) var(--ease-out);
   }
+  .card:hover .card__title a,
+  .card__title a:focus-visible { background-size: 100% 1px; }
   /* The whole card is clickable, but only the title is a real link — so the
      card keeps one tab stop and screen readers get one meaningful target. */
   .card__title a::after { content: ''; position: absolute; inset: 0; }

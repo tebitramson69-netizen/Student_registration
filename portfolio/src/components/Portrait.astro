@@ -3,89 +3,98 @@ import { Image } from 'astro:assets';
 import { portrait, profile } from '../data/site';
 import { uploaded } from '../lib/images';
 
-const photo = uploaded(portrait.src);
-
 /**
- * The hero portrait. When no photograph is available it renders a designed
- * monogram instead of an empty frame or a stock face — the site should never
- * imply a photo exists when it does not, and never invent a likeness.
+ * The hero portrait, framed like a plate in a printed piece: a hairline frame,
+ * the image, and a caption rule beneath it.
+ *
+ * With no photograph it renders a monogram plate instead. That fallback is
+ * designed rather than apologetic — no dashed "missing image" box, no stock
+ * face, and never a generated likeness.
  */
-interface Props {
-  size?: 'hero' | 'inline';
-}
-const { size = 'hero' } = Astro.props;
+const photo = uploaded(portrait.src);
 ---
-<figure class={`portrait portrait--${size}`} data-reveal>
-  {photo ? (
-    <Image
-      class="portrait__image"
-      src={photo}
-      alt={portrait.alt}
-      widths={[320, 480, 640, 960]}
-      width={960}
-      height={1200}
-      sizes="(min-width: 62em) 24rem, min(100vw - 2rem, 22rem)"
-      loading="eager"
-      fetchpriority="high"
-    />
-  ) : (
-    <div class="portrait__placeholder" role="img" aria-label={`Monogram standing in for a photograph of ${profile.name}`}>
-      <span class="portrait__monogram" aria-hidden="true">{profile.initials}</span>
-      <span class="portrait__note">Photograph<br />to come</span>
-    </div>
-  )}
+<figure class="plate" data-reveal style="--reveal-delay:120ms">
+  <div class="plate__frame">
+    {photo ? (
+      <Image
+        class="plate__image"
+        src={photo}
+        alt={portrait.alt}
+        widths={[320, 480, 640, 960]}
+        width={960}
+        height={1200}
+        sizes="(min-width: 62em) 24rem, min(100vw - 2rem, 22rem)"
+        loading="eager"
+        fetchpriority="high"
+      />
+    ) : (
+      <div
+        class="plate__monogram"
+        role="img"
+        aria-label={`Monogram standing in for a photograph of ${profile.name}`}
+      >
+        <span aria-hidden="true">{profile.initials}</span>
+      </div>
+    )}
+  </div>
+
+  <figcaption class="plate__caption">
+    <span class="meta">{profile.initials}</span>
+    <span class="plate__caption-rule" aria-hidden="true"></span>
+    <span class="meta">{profile.location}</span>
+  </figcaption>
 </figure>
 
 <style>
-  .portrait { margin: 0; position: relative; }
-
-  .portrait--hero {
-    width: min(100%, 22rem);
+  .plate {
+    margin: 0;
+    width: min(100%, 21rem);
     justify-self: center;
   }
   @media (min-width: 62em) {
-    .portrait--hero { width: 100%; max-width: 24rem; justify-self: end; }
+    .plate { width: 100%; max-width: 23rem; justify-self: end; }
   }
 
-  .portrait__image,
-  .portrait__placeholder {
+  /* The frame is a hairline with generous padding — the mount around a print,
+     not a border around a div. */
+  .plate__frame {
+    padding: var(--space-2xs);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: 2px;
+  }
+
+  .plate__image,
+  .plate__monogram {
     width: 100%;
     aspect-ratio: 4 / 5;
-    border-radius: var(--radius-l);
-    border: 1px solid var(--border);
     object-fit: cover;
     object-position: center 22%;
-    background: var(--bg-sunken);
-    box-shadow: var(--shadow-l);
+    border-radius: 1px;
+    display: block;
   }
 
-  .portrait__placeholder {
+  .plate__monogram {
     display: grid;
-    place-content: center;
-    justify-items: center;
-    gap: var(--space-xs);
+    place-items: center;
     background:
-      radial-gradient(90% 70% at 50% 8%, var(--accent-soft) 0%, transparent 72%),
+      radial-gradient(75% 55% at 50% 12%, var(--accent-soft) 0%, transparent 70%),
       var(--bg-sunken);
-    border-style: dashed;
-    border-color: var(--border-strong);
   }
-
-  .portrait__monogram {
+  .plate__monogram span {
     font-family: var(--font-display);
-    font-size: clamp(3.5rem, 12vw, 5rem);
+    font-size: clamp(4.5rem, 16vw, 7rem);
     line-height: 1;
-    letter-spacing: var(--tracking-tight);
+    letter-spacing: -0.04em;
     color: var(--accent-ink);
+    opacity: 0.9;
   }
 
-  .portrait__note {
-    font-family: var(--font-mono);
-    font-size: var(--step--2);
-    letter-spacing: var(--tracking-wide);
-    text-transform: uppercase;
-    color: var(--text-subtle);
-    text-align: center;
-    line-height: 1.5;
+  .plate__caption {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    margin-top: var(--space-2xs);
   }
+  .plate__caption-rule { flex: 1; height: 1px; background: var(--border); }
 </style>

@@ -14,10 +14,11 @@ html {
   scroll-behavior: smooth;
   /* Offset anchor targets so the sticky header never covers a heading. */
   scroll-padding-top: 6rem;
+  background: var(--bg);
 }
 
 body {
-  background: var(--bg);
+  background: transparent;
   color: var(--text);
   font-family: var(--font-sans);
   font-size: var(--step-0);
@@ -231,4 +232,79 @@ strong { font-weight: 600; }
   .site-header, .site-footer, .no-print { display: none !important; }
   body { background: #fff; color: #000; }
   a::after { content: ' (' attr(href) ')'; font-size: 0.8em; color: #555; }
+}
+
+
+/* ===========================================================================
+   Grain
+
+   A single tile of fractal noise, fixed behind the content. It gives flat
+   colour a faint tactile quality — the difference between a screen filled with
+   #fbfaf8 and a sheet of paper. Kept behind the content layer rather than over
+   it so text stays perfectly crisp, and kept very low so it reads as material
+   rather than as an effect.
+   =========================================================================== */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.22;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+  /* soft-light keeps the paper warm; multiply drains it towards grey. */
+  mix-blend-mode: soft-light;
+}
+:root[data-theme='dark'] .grain { mix-blend-mode: soft-light; opacity: 0.3; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .grain { mix-blend-mode: soft-light; opacity: 0.3; }
+}
+
+/* Content sits above the grain. */
+.site-header { z-index: 50; }
+main,
+.site-footer { position: relative; z-index: 1; }
+
+/* ===========================================================================
+   Rules
+
+   Hairlines are the backbone of the layout. A full-bleed rule above a section
+   heading does more for a page's sense of structure than any amount of colour.
+   =========================================================================== */
+.rule {
+  height: 1px;
+  background: var(--border);
+  border: 0;
+  margin: 0;
+}
+
+/* ===========================================================================
+   Meta row — mono, uppercase, letterspaced. The "technical" register.
+   =========================================================================== */
+.meta {
+  font-family: var(--font-mono);
+  font-size: var(--step--2);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-subtle);
+}
+
+/* ===========================================================================
+   Link with an underline that sweeps in from the left on hover.
+   Transform-based, so it animates on the compositor.
+   =========================================================================== */
+.sweep {
+  position: relative;
+  text-decoration: none;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size var(--duration-base) var(--ease-out);
+  padding-bottom: 0.08em;
+}
+.sweep:hover,
+.sweep:focus-visible { background-size: 100% 1px; }
+@media (prefers-reduced-motion: reduce) {
+  .sweep { transition: none; }
 }

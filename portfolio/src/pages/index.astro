@@ -10,6 +10,7 @@ import { url } from '../lib/url';
 
 const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
 const featured = projects.filter((p) => p.data.featured);
+const year = new Date().getFullYear();
 ---
 <Base
   title={profile.name}
@@ -17,55 +18,68 @@ const featured = projects.filter((p) => p.data.featured);
   includePersonSchema
 >
   <!-- ===================================================================
-       HERO — who, what, why keep reading
+       HERO - who, what, why keep reading
        =================================================================== -->
   <section class="hero">
-    <div class="page hero__inner">
-      <div class="hero__text">
+    <div class="page">
+      <hr class="rule" />
+
+      <!-- Masthead row: the register a printed cover uses. -->
+      <div class="hero__masthead">
+        <span class="meta">Portfolio &mdash; {year}</span>
         {profile.availability && (
-          <p class="hero__status" data-reveal>
+          <span class="meta hero__status">
             <span class="hero__dot" aria-hidden="true"></span>
             {profile.availability}
-          </p>
+          </span>
         )}
+      </div>
 
-        <h1 class="hero__name" data-reveal style="--reveal-delay:60ms">
-          {profile.name}
-        </h1>
+      <div class="hero__grid">
+        <div class="hero__text">
+          <h1 class="hero__name" data-reveal>{profile.name}</h1>
 
-        <p class="hero__role" data-reveal style="--reveal-delay:120ms">
-          HND Software Engineering student<span class="hero__sep" aria-hidden="true">·</span>
-          Full-stack developer<span class="hero__sep" aria-hidden="true">·</span>
-          Douala, Cameroon
-        </p>
-
-        <p class="hero__tagline" data-reveal style="--reveal-delay:180ms">
-          {profile.tagline}
-        </p>
-
-        {profile.intro && (
-          <p class="hero__body" data-reveal style="--reveal-delay:220ms">
-            {profile.intro}
+          <p class="hero__role meta" data-reveal style="--reveal-delay:80ms">
+            <span>HND Software Engineering student</span>
+            <span>Full-stack developer</span>
+            <span>{profile.location}</span>
           </p>
-        )}
 
-        <div class="hero__actions" data-reveal style="--reveal-delay:280ms">
-          <a class="button button--primary" href={url('/projects')}>
-            See what I have built
-            <Icon name="arrow" size={16} />
-          </a>
-          <a class="button button--secondary" href={url('/contact')}>Get in touch</a>
+          <p class="hero__tagline" data-reveal style="--reveal-delay:150ms">
+            {profile.tagline}
+          </p>
+
+          {profile.intro && (
+            <p class="hero__body" data-reveal style="--reveal-delay:210ms">
+              {profile.intro}
+            </p>
+          )}
+
+          <div class="hero__actions" data-reveal style="--reveal-delay:270ms">
+            <a class="button button--primary" href={url('/projects')}>
+              See what I have built
+              <Icon name="arrow" size={16} />
+            </a>
+            <a class="button button--secondary" href={url('/contact')}>Get in touch</a>
+          </div>
         </div>
 
-        <ul class="hero__socials" data-reveal style="--reveal-delay:340ms">
+        <Portrait />
+      </div>
+
+      <!-- Footer row of the hero: links, ruled off from the composition. -->
+      <div class="hero__foot" data-reveal style="--reveal-delay:330ms">
+        <hr class="rule" />
+        <ul class="hero__socials">
           {socials.map((social) => (
             <li>
               <a
+                class="sweep"
                 href={social.href}
                 target={social.href.startsWith('http') ? '_blank' : undefined}
                 rel={social.href.startsWith('http') ? 'noopener noreferrer' : undefined}
               >
-                <Icon name={social.icon} size={16} />
+                <Icon name={social.icon} size={15} />
                 <span>{social.label}</span>
                 {social.href.startsWith('http') && (
                   <span class="visually-hidden">(opens in a new tab)</span>
@@ -75,8 +89,6 @@ const featured = projects.filter((p) => p.data.featured);
           ))}
         </ul>
       </div>
-
-      <Portrait />
     </div>
   </section>
 
@@ -86,6 +98,7 @@ const featured = projects.filter((p) => p.data.featured);
   <section class="section section--sunken" id="work">
     <div class="page">
       <SectionHeading
+        index="01"
         eyebrow="Selected work"
         title="Two systems I designed, built and had to live with"
         lead="Not demos. Both are real applications with a schema, a security model and a list of things still wrong with them — which I have written down."
@@ -112,27 +125,30 @@ const featured = projects.filter((p) => p.data.featured);
   <section class="section" id="skills">
     <div class="page">
       <SectionHeading
+        index="02"
         eyebrow="Capability"
         title="What I actually work with"
         lead="A short list on purpose. Everything here is something I have used to build one of the projects on this site, or use every working day."
       />
 
-      <div class="grid-skills">
+      <dl class="caps">
         {skillGroups.map((group, i) => (
-          <div class="skill-group" data-reveal style={`--reveal-delay:${i * 70}ms`}>
-            <h3 class="skill-group__title">{group.title}</h3>
-            <p class="skill-group__note">{group.note}</p>
-            <ul class="skill-group__list">
+          <div class="caps__row" data-reveal style={`--reveal-delay:${i * 60}ms`}>
+            <dt class="caps__group">
+              <span class="caps__title">{group.title}</span>
+              {group.note && <span class="caps__note">{group.note}</span>}
+            </dt>
+            <dd class="caps__items">
               {group.items.map((item) => (
-                <li>
-                  <span class="skill-group__name">{item.name}</span>
-                  <span class="skill-group__detail">{item.detail}</span>
-                </li>
+                <span class="caps__item">
+                  <span class="caps__name">{item.name}</span>
+                  {item.detail && <span class="caps__detail">{item.detail}</span>}
+                </span>
               ))}
-            </ul>
+            </dd>
           </div>
         ))}
-      </div>
+      </dl>
     </div>
   </section>
 
@@ -163,66 +179,84 @@ const featured = projects.filter((p) => p.data.featured);
 
 <style>
   /* ===================== Hero ===================== */
-  .hero { padding-block: clamp(2.5rem, 1rem + 7vw, 6rem) var(--section-y); }
+  .hero { padding-block: var(--space-m) var(--section-y); }
 
-  .hero__inner {
-    display: grid;
-    gap: var(--space-xl);
+  /* --- Masthead row --- */
+  .hero__masthead {
+    display: flex;
+    flex-wrap: wrap;
     align-items: center;
-  }
-  @media (min-width: 62em) {
-    .hero__inner { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: var(--space-2xl); }
+    justify-content: space-between;
+    gap: var(--space-2xs) var(--space-s);
+    padding-top: var(--space-2xs);
   }
 
-  .hero__status {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5em;
-    font-family: var(--font-mono);
-    font-size: var(--step--2);
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    border: 1px solid var(--border);
-    background: var(--surface);
-    border-radius: var(--radius-full);
-    padding: 0.3em 0.85em;
-  }
+  .hero__status { display: inline-flex; align-items: center; gap: 0.55em; color: var(--accent-ink); }
   .hero__dot {
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
     border-radius: var(--radius-full);
-    background: var(--accent);
+    background: currentColor;
     flex: none;
   }
 
+  /* --- Main grid --- */
+  .hero__grid {
+    display: grid;
+    gap: var(--space-xl);
+    align-items: end;
+    padding-block: clamp(2rem, 1rem + 5vw, 4rem) clamp(1.5rem, 0.5rem + 3vw, 2.5rem);
+  }
+  @media (min-width: 62em) {
+    .hero__grid {
+      grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+      gap: var(--space-2xl);
+    }
+  }
+
+  /* The name is the largest thing on the site, and the only place the display
+     face is pushed to its tightest tracking. */
   .hero__name {
     font-size: var(--step-5);
-    margin-top: var(--space-s);
-    font-weight: 480;
+    font-weight: 450;
+    letter-spacing: -0.032em;
+    line-height: 0.96;
+    text-wrap: balance;
   }
 
   .hero__role {
-    margin-top: var(--space-2xs);
-    font-size: var(--step-0);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.15em 0.55em;
+    margin-top: var(--space-m);
     color: var(--text-muted);
-    font-weight: 500;
   }
-  .hero__sep { margin-inline: 0.5em; color: var(--accent); }
+  /* The separator belongs to the item that follows it, so when the line wraps
+     the slash travels down with its word instead of dangling at the end. */
+  .hero__role span + span::before {
+    content: '/';
+    color: var(--accent);
+    margin-right: 0.55em;
+  }
 
   .hero__tagline {
-    margin-top: var(--space-m);
+    margin-top: var(--space-l);
     font-family: var(--font-display);
     font-size: var(--step-2);
-    line-height: 1.35;
+    font-weight: 400;
+    line-height: 1.3;
     letter-spacing: var(--tracking-tight);
-    max-width: 28ch;
+    max-width: 26ch;
+    /* A hanging rule ties the sentence to the grid rather than floating it. */
+    padding-left: var(--space-s);
+    border-left: 2px solid var(--accent);
   }
 
   .hero__body {
-    margin-top: var(--space-s);
+    margin-top: var(--space-m);
     color: var(--text-muted);
-    max-width: 52ch;
+    max-width: 50ch;
   }
 
   .hero__actions {
@@ -232,26 +266,25 @@ const featured = projects.filter((p) => p.data.featured);
     margin-top: var(--space-l);
   }
 
+  /* --- Foot --- */
   .hero__socials {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-m);
-    margin-top: var(--space-l);
-    padding-top: var(--space-s);
-    border-top: 1px solid var(--border);
+    gap: var(--space-s) var(--space-l);
     list-style: none;
-    padding-inline: 0;
+    padding: 0;
+    margin-top: var(--space-s);
   }
   .hero__socials a {
     display: inline-flex;
     align-items: center;
-    gap: 0.45em;
+    gap: 0.5em;
     font-size: var(--step--1);
     color: var(--text-muted);
-    text-decoration: none;
-    padding-block: 0.3rem;
+    min-height: 24px;
   }
-  .hero__socials a:hover { color: var(--accent-ink); }
+  .hero__socials a:hover { color: var(--text); }
+  .hero__socials svg { color: var(--text-subtle); }
 
   /* ===================== Grids ===================== */
   .grid-projects {
@@ -279,44 +312,49 @@ const featured = projects.filter((p) => p.data.featured);
   }
   .link-arrow:hover { gap: 0.85em; color: var(--accent-ink); border-bottom-color: currentColor; }
 
-  /* ===================== Skills ===================== */
-  .grid-skills {
-    display: grid;
-    gap: var(--space-l);
-    grid-template-columns: 1fr;
-  }
-  @media (min-width: 38em) { .grid-skills { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  @media (min-width: 64em) { .grid-skills { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  /* ===================== Capabilities table =====================
+     A ruled two-column table reads as technical documentation rather than as
+     marketing, which is the right register for this content — and it scans far
+     faster than four stacked lists. */
+  .caps { margin: 0; border-top: 1px solid var(--border); }
 
-  .skill-group__title {
-    font-size: var(--step-1);
-    padding-bottom: var(--space-2xs);
+  .caps__row {
+    display: grid;
+    gap: var(--space-2xs);
+    padding-block: var(--space-m);
     border-bottom: 1px solid var(--border);
   }
-  .skill-group__note {
-    margin-top: var(--space-2xs);
-    font-size: var(--step--2);
-    color: var(--text-subtle);
-    font-style: italic;
+  @media (min-width: 46em) {
+    .caps__row {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 2.6fr);
+      gap: var(--space-l);
+      align-items: start;
+    }
   }
-  .skill-group__list {
-    margin-top: var(--space-s);
-    list-style: none;
-    padding: 0;
+
+  .caps__group { display: flex; flex-direction: column; gap: var(--space-3xs); }
+  .caps__title {
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    letter-spacing: var(--tracking-tight);
+  }
+  .caps__note { font-size: var(--step--2); color: var(--text-subtle); font-style: italic; }
+
+  .caps__items {
+    margin: 0;
     display: grid;
     gap: var(--space-xs);
   }
-  .skill-group__name {
-    display: block;
+  @media (min-width: 34em) {
+    .caps__items { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-s) var(--space-l); }
+  }
+
+  .caps__item { display: flex; flex-direction: column; gap: 0.1rem; }
+  .caps__name {
     font-size: var(--step--1);
     font-weight: 560;
   }
-  .skill-group__detail {
-    display: block;
-    font-size: var(--step--2);
-    color: var(--text-muted);
-    line-height: 1.5;
-  }
+  .caps__detail { font-size: var(--step--2); color: var(--text-muted); line-height: 1.5; }
 
   /* ===================== CTA ===================== */
   .cta {
