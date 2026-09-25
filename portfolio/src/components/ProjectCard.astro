@@ -1,0 +1,212 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { url } from '../lib/url';
+import Icon from './Icon.astro';
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+  /** Index used to stagger the entrance animation. */
+  index?: number;
+  /**
+   * Heading level for the card title. The correct value depends on what
+   * precedes the card: h3 under a section's h2, h2 under a page's h1.
+   */
+  headingLevel?: 'h2' | 'h3';
+}
+const { project, index = 0, headingLevel: Heading = 'h3' } = Astro.props;
+const { data } = project;
+const href = url(`/projects/${project.id}`);
+---
+<article class="card" data-reveal style={`--reveal-delay:${Math.min(index, 4) * 70}ms`}>
+  <a class="card__media" href={href} tabindex="-1" aria-hidden="true">
+    {data.image ? (
+      <img src={url(data.image)} alt="" width="800" height="500" loading="lazy" decoding="async" />
+    ) : (
+      /* No screenshot yet — a designed fallback rather than a broken frame. */
+      <span class="card__fallback">
+        <span class="card__fallback-mark">{data.title.charAt(0)}</span>
+        <span class="card__fallback-note">Screenshot coming</span>
+      </span>
+    )}
+  </a>
+
+  <div class="card__body">
+    <p class="card__meta">
+      <span class="card__category">{data.category}</span>
+      <span aria-hidden="true">·</span>
+      <span>{data.year}</span>
+    </p>
+
+    <Heading class="card__title">
+      <a href={href}>
+        {data.title}
+        <span class="card__arrow" aria-hidden="true"><Icon name="arrow" size={17} /></span>
+      </a>
+    </Heading>
+
+    <p class="card__summary">{data.summary}</p>
+
+    <p class="card__status">{data.status}</p>
+
+    <ul class="tag-list card__tags">
+      {data.tech.slice(0, 5).map((t) => <li class="tag">{t}</li>)}
+      {data.tech.length > 5 && <li class="tag">+{data.tech.length - 5}</li>}
+    </ul>
+
+    {data.repo && (
+      <p class="card__links">
+        <a href={data.repo} target="_blank" rel="noopener noreferrer">
+          <Icon name="github" size={15} />
+          <span>Source</span>
+          <span class="visually-hidden">for {data.title} (opens in a new tab)</span>
+        </a>
+        {data.demo && (
+          <a href={data.demo} target="_blank" rel="noopener noreferrer">
+            <Icon name="external" size={15} />
+            <span>Live demo</span>
+            <span class="visually-hidden">of {data.title} (opens in a new tab)</span>
+          </a>
+        )}
+      </p>
+    )}
+  </div>
+</article>
+
+<style>
+  .card {
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-l);
+    overflow: hidden;
+    transition:
+      border-color var(--duration-base) var(--ease-out),
+      box-shadow var(--duration-base) var(--ease-out),
+      transform var(--duration-base) var(--ease-out);
+  }
+  .card:hover {
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow-l);
+    transform: translateY(-3px);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card:hover { transform: none; }
+  }
+
+  /* --- Media ------------------------------------------------------------ */
+  .card__media {
+    display: block;
+    aspect-ratio: 16 / 10;
+    background: var(--bg-sunken);
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .card__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--duration-slow) var(--ease-out);
+  }
+  .card:hover .card__media img { transform: scale(1.03); }
+
+  .card__fallback {
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: var(--space-2xs);
+    height: 100%;
+    background:
+      radial-gradient(120% 100% at 50% 0%, var(--accent-soft) 0%, transparent 70%),
+      var(--bg-sunken);
+  }
+  .card__fallback-mark {
+    font-family: var(--font-display);
+    font-size: 2.6rem;
+    line-height: 1;
+    color: var(--accent-ink);
+    opacity: 0.55;
+  }
+  .card__fallback-note {
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--text-subtle);
+  }
+
+  /* --- Body ------------------------------------------------------------- */
+  .card__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xs);
+    padding: var(--space-m);
+    flex: 1;
+  }
+
+  .card__meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+  }
+  .card__category { color: var(--accent-ink); }
+
+  .card__title { font-size: var(--step-2); }
+  .card__title a {
+    text-decoration: none;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.4em;
+  }
+  /* The whole card is clickable, but only the title is a real link — so the
+     card keeps one tab stop and screen readers get one meaningful target. */
+  .card__title a::after { content: ''; position: absolute; inset: 0; }
+  .card { position: relative; }
+
+  .card__arrow {
+    display: inline-flex;
+    color: var(--text-subtle);
+    transition: transform var(--duration-base) var(--ease-out), color var(--duration-base) var(--ease-out);
+  }
+  .card:hover .card__arrow { transform: translateX(4px); color: var(--accent-ink); }
+
+  .card__summary { color: var(--text-muted); font-size: var(--step--1); }
+
+  .card__status {
+    font-size: var(--step--2);
+    color: var(--text-subtle);
+    padding-left: 0.8em;
+    border-left: 2px solid var(--accent);
+  }
+
+  .card__tags { margin-top: auto; padding-top: var(--space-2xs); }
+
+  .card__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s);
+    padding-top: var(--space-2xs);
+    border-top: 1px solid var(--border);
+    margin-top: var(--space-2xs);
+  }
+  .card__links a {
+    /* Raised above the title's full-card overlay so these stay clickable. */
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    font-size: var(--step--2);
+    color: var(--text-muted);
+    text-decoration: none;
+    /* WCAG 2.2 SC 2.5.8: at least 24x24 CSS px of target. */
+    min-height: 24px;
+    padding-block: 0.15rem;
+  }
+  .card__links a:hover { color: var(--accent-ink); text-decoration: underline; }
+</style>

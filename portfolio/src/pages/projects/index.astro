@@ -1,0 +1,47 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import SectionHeading from '../../components/SectionHeading.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+
+const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+---
+<Base
+  title="Projects"
+  description="Case studies by Tebit Ramson Titih: a Cameroon-focused school management platform in PHP, a Laravel media pipeline, and the CRUD app he built first."
+>
+  <section class="section">
+    <div class="page">
+      <SectionHeading
+        eyebrow="Projects"
+        title="Three projects, in the order I learned from them."
+        as="h1"
+        lead="Each one is written up properly: the problem, the decisions I made, the part that was hardest, and what is still wrong with it."
+      />
+
+      {projects.length === 0 ? (
+        <p class="empty">No projects are published yet. Check back soon.</p>
+      ) : (
+        <div class="grid-projects">
+          {projects.map((project, i) => (
+            <ProjectCard project={project} index={i} headingLevel="h2" />
+          ))}
+        </div>
+      )}
+    </div>
+  </section>
+</Base>
+
+<style>
+  .grid-projects { display: grid; gap: var(--space-m); grid-template-columns: 1fr; }
+  @media (min-width: 46em) { .grid-projects { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 72em) { .grid-projects { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+  .empty {
+    padding: var(--space-xl);
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius-l);
+    text-align: center;
+    color: var(--text-subtle);
+  }
+</style>

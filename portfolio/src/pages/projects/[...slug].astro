@@ -1,0 +1,297 @@
+---
+import { getCollection, render } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import { url } from '../../lib/url';
+import { profile } from '../../data/site';
+
+export const getStaticPaths = (async () => {
+  const projects = await getCollection('projects');
+  return projects.map((project) => ({
+    params: { slug: project.id },
+    props: { project },
+  }));
+}) satisfies GetStaticPaths;
+
+const { project } = Astro.props;
+const { data } = project;
+const { Content } = await render(project);
+
+// Ordering lets us offer "next case study" rather than dead-ending the page.
+const all = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+const index = all.findIndex((p) => p.id === project.id);
+const next = all[(index + 1) % all.length];
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'CreativeWork',
+  name: data.title,
+  abstract: data.summary,
+  author: { '@type': 'Person', name: profile.name },
+  dateCreated: data.year,
+  keywords: data.tech.join(', '),
+  ...(data.repo ? { codeRepository: data.repo } : {}),
+};
+---
+<Base title={data.title} description={data.summary} type="article">
+  <article class="case">
+    <!-- Header -->
+    <header class="case__header">
+      <div class="page">
+        <a class="case__back" href={url('/projects')}>
+          <span aria-hidden="true">←</span> All projects
+        </a>
+
+        <p class="eyebrow case__eyebrow">{data.category} · {data.year}</p>
+        <h1 class="case__title">{data.title}</h1>
+        <p class="case__summary">{data.summary}</p>
+
+        <dl class="case__facts">
+          <div>
+            <dt>Role</dt>
+            <dd>{data.role}</dd>
+          </div>
+          <div>
+            <dt>Status</dt>
+            <dd>{data.status}</dd>
+          </div>
+          <div class="case__facts-wide">
+            <dt>Built with</dt>
+            <dd>
+              <ul class="tag-list">
+                {data.tech.map((t) => <li class="tag">{t}</li>)}
+              </ul>
+            </dd>
+          </div>
+        </dl>
+
+        {(data.repo || data.demo) && (
+          <p class="case__links">
+            {data.repo && (
+              <a class="button button--primary" href={data.repo} target="_blank" rel="noopener noreferrer">
+                <Icon name="github" size={16} />
+                View source
+                <span class="visually-hidden">(opens in a new tab)</span>
+              </a>
+            )}
+            {data.demo && (
+              <a class="button button--secondary" href={data.demo} target="_blank" rel="noopener noreferrer">
+                <Icon name="external" size={16} />
+                Live demo
+                <span class="visually-hidden">(opens in a new tab)</span>
+              </a>
+            )}
+          </p>
+        )}
+      </div>
+    </header>
+
+    <!-- Verified metrics only. The block is omitted entirely when there are none. -->
+    {data.metrics && data.metrics.length > 0 && (
+      <div class="page">
+        <ul class="case__metrics">
+          {data.metrics.map((metric) => (
+            <li>
+              <span class="case__metric-value">{metric.value}</span>
+              <span class="case__metric-label">{metric.label}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+
+    <!-- Hero image, when one exists -->
+    {data.image && (
+      <div class="page">
+        <figure class="case__hero">
+          <img
+            src={url(data.image)}
+            alt={data.imageAlt ?? `Screenshot of ${data.title}`}
+            width="1600"
+            height="1000"
+            loading="eager"
+            decoding="async"
+          />
+        </figure>
+      </div>
+    )}
+
+    <!-- Body -->
+    <div class="page">
+      <div class="case__body prose">
+        <Content />
+      </div>
+    </div>
+
+    <!-- Next -->
+    <nav class="case__next" aria-label="More projects">
+      <div class="page">
+        <p class="eyebrow">Next case study</p>
+        <a class="case__next-link" href={url(`/projects/${next.id}`)}>
+          <span>{next.data.title}</span>
+          <Icon name="arrow" size={22} />
+        </a>
+        <p class="case__next-summary">{next.data.summary}</p>
+      </div>
+    </nav>
+  </article>
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />
+</Base>
+
+<style>
+  .case__header { padding-block: var(--space-xl) var(--space-l); }
+
+  .case__back {
+    /* WCAG 2.2 SC 2.5.8: at least 24x24 CSS px of target. */
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    font-size: var(--step--1);
+    color: var(--text-muted);
+    text-decoration: none;
+    margin-bottom: var(--space-l);
+  }
+  .case__back:hover { color: var(--accent-ink); }
+
+  .case__title { font-size: var(--step-4); margin-top: var(--space-2xs); max-width: 18ch; }
+  .case__summary {
+    margin-top: var(--space-s);
+    font-size: var(--step-1);
+    color: var(--text-muted);
+    max-width: 58ch;
+    line-height: 1.5;
+  }
+
+  .case__facts {
+    display: grid;
+    gap: var(--space-m);
+    margin-top: var(--space-xl);
+    padding-top: var(--space-m);
+    border-top: 1px solid var(--border);
+  }
+  @media (min-width: 46em) {
+    .case__facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .case__facts-wide { grid-column: 1 / -1; }
+  }
+  .case__facts dt {
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--text-subtle);
+    margin-bottom: var(--space-3xs);
+  }
+  .case__facts dd { margin: 0; font-size: var(--step--1); }
+
+  .case__links { display: flex; flex-wrap: wrap; gap: var(--space-2xs); margin-top: var(--space-l); }
+
+  /* --- Metrics ---------------------------------------------------------- */
+  .case__metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+    gap: var(--space-s);
+    list-style: none;
+    padding: var(--space-m);
+    margin-block: var(--space-l);
+    background: var(--bg-sunken);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-l);
+  }
+  .case__metric-value {
+    display: block;
+    font-family: var(--font-display);
+    font-size: var(--step-3);
+    line-height: 1;
+    letter-spacing: var(--tracking-tight);
+    color: var(--accent-ink);
+  }
+  .case__metric-label {
+    display: block;
+    margin-top: var(--space-3xs);
+    font-size: var(--step--2);
+    color: var(--text-muted);
+  }
+
+  .case__hero {
+    margin-block: var(--space-l);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-l);
+    overflow: hidden;
+    box-shadow: var(--shadow-l);
+  }
+
+  /* --- Body ------------------------------------------------------------- */
+  .case__body { padding-block: var(--space-l) var(--space-2xl); }
+
+  .case__body :global(h2) {
+    font-size: var(--step-2);
+    margin-top: var(--space-2xl);
+    padding-top: var(--space-s);
+    border-top: 1px solid var(--border);
+  }
+  .case__body :global(h3) { font-size: var(--step-1); margin-top: var(--space-xl); }
+  .case__body :global(p) { margin-top: var(--space-s); color: var(--text-muted); }
+  .case__body :global(strong) { color: var(--text); font-weight: 580; }
+
+  .case__body :global(ul),
+  .case__body :global(ol) {
+    margin-top: var(--space-s);
+    padding-left: 1.2em;
+    display: grid;
+    gap: var(--space-2xs);
+    color: var(--text-muted);
+  }
+  .case__body :global(li::marker) { color: var(--accent); }
+
+  .case__body :global(blockquote) {
+    margin-top: var(--space-m);
+    padding: var(--space-s) var(--space-m);
+    border-left: 3px solid var(--accent);
+    background: var(--bg-sunken);
+    border-radius: 0 var(--radius-m) var(--radius-m) 0;
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+  }
+  .case__body :global(blockquote p) { margin: 0; color: var(--text); }
+
+  .case__body :global(pre) {
+    margin-top: var(--space-m);
+    padding: var(--space-s);
+    background: var(--bg-sunken);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-m);
+    overflow-x: auto;
+    font-size: var(--step--1);
+    line-height: 1.6;
+  }
+  .case__body :global(code) { font-family: var(--font-mono); font-size: 0.92em; }
+  .case__body :global(:not(pre) > code) {
+    background: var(--bg-sunken);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-s);
+    padding: 0.1em 0.35em;
+    color: var(--text);
+  }
+
+  /* --- Next ------------------------------------------------------------- */
+  .case__next {
+    border-top: 1px solid var(--border);
+    background: var(--bg-sunken);
+    padding-block: var(--space-xl);
+  }
+  .case__next-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    margin-top: var(--space-2xs);
+    font-family: var(--font-display);
+    font-size: var(--step-3);
+    letter-spacing: var(--tracking-tight);
+    text-decoration: none;
+    transition: gap var(--duration-base) var(--ease-out), color var(--duration-fast) var(--ease-out);
+  }
+  .case__next-link:hover { gap: var(--space-s); color: var(--accent-ink); }
+  .case__next-summary { margin-top: var(--space-2xs); color: var(--text-muted); max-width: 52ch; }
+</style>

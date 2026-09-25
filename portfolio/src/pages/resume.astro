@@ -1,0 +1,152 @@
+---
+import Base from '../layouts/Base.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import Timeline from '../components/Timeline.astro';
+import Icon from '../components/Icon.astro';
+import { experience, education, skillGroups, cv, profile } from '../data/site';
+import { url } from '../lib/url';
+---
+<Base
+  title="Résumé"
+  description="Experience, education and technical skills for Tebit Ramson Titih — HND Software Engineering student in Douala and software engineering intern at NgahTech Group."
+>
+  <section class="section">
+    <div class="page">
+      <SectionHeading
+        eyebrow="Résumé"
+        title="Experience, education and the tools behind it."
+        as="h1"
+        lead="Short, because it is honest. Everything below is verifiable, and the detail lives in the case studies."
+      />
+
+      <div class="resume__download no-print" data-reveal>
+        {cv.available ? (
+          <a class="button button--primary" href={url(cv.path)} download={cv.filename}>
+            <Icon name="download" size={16} />
+            Download CV (PDF)
+          </a>
+        ) : (
+          <p class="resume__cv-pending">
+            <strong>Owner note:</strong> no CV PDF is published yet. Drop one at
+            <code>public/{cv.path}</code> and set <code>cv.available = true</code> in
+            <code>src/data/site.ts</code> — this button appears automatically.
+          </p>
+        )}
+        <a class="button button--secondary" href={`mailto:${profile.email}`}>
+          <Icon name="mail" size={16} />
+          Email me
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--sunken" id="experience">
+    <div class="page">
+      <SectionHeading
+        eyebrow="Experience"
+        title="Where I have worked"
+        id="experience-heading"
+      />
+      <Timeline entries={experience} />
+    </div>
+  </section>
+
+  <section class="section" id="education">
+    <div class="page">
+      <SectionHeading eyebrow="Education" title="Where I am studying" id="education-heading" />
+      <Timeline entries={education} />
+    </div>
+  </section>
+
+  <section class="section section--sunken" id="skills">
+    <div class="page">
+      <SectionHeading
+        eyebrow="Skills"
+        title="Technical skills"
+        lead="Grouped by the job each one does, not by how impressive the list looks."
+        id="skills-heading"
+      />
+
+      <div class="resume__skills">
+        {skillGroups.map((group, i) => (
+          <section class="resume__skill-group" data-reveal style={`--reveal-delay:${i * 60}ms`}>
+            <h3>{group.title}</h3>
+            <ul>
+              {group.items.map((item) => (
+                <li>
+                  <span class="resume__skill-name">{item.name}</span>
+                  <span class="resume__skill-detail">{item.detail}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
+      </div>
+
+      <p class="resume__footnote" data-reveal>
+        Deliberately not listed: technologies I have read about but never shipped
+        with. A shorter list you can ask hard questions about is worth more than a
+        long one you cannot.
+      </p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .resume__download {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2xs);
+  }
+
+  .resume__cv-pending {
+    flex: 1 1 24rem;
+    padding: var(--space-2xs) var(--space-xs);
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius-s);
+    background: var(--bg-sunken);
+    font-size: var(--step--2);
+    color: var(--text-subtle);
+  }
+  .resume__cv-pending code { font-family: var(--font-mono); }
+  .resume__cv-pending strong { color: var(--text-muted); }
+
+  .resume__skills {
+    display: grid;
+    gap: var(--space-l);
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 38em) { .resume__skills { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 64em) { .resume__skills { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+  .resume__skill-group h3 {
+    font-size: var(--step-1);
+    padding-bottom: var(--space-2xs);
+    border-bottom: 1px solid var(--border);
+  }
+  .resume__skill-group ul {
+    margin-top: var(--space-s);
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: var(--space-xs);
+  }
+  .resume__skill-name { display: block; font-size: var(--step--1); font-weight: 560; }
+  .resume__skill-detail {
+    display: block;
+    font-size: var(--step--2);
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .resume__footnote {
+    margin-top: var(--space-xl);
+    padding-top: var(--space-s);
+    border-top: 1px solid var(--border);
+    color: var(--text-subtle);
+    font-size: var(--step--1);
+    max-width: var(--measure);
+    font-style: italic;
+  }
+</style>

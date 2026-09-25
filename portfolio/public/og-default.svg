@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="glow" x1="0" y1="0" x2="0.6" y2="1">
+      <stop offset="0%" stop-color="#b1512a" stop-opacity="0.22"/>
+      <stop offset="60%" stop-color="#b1512a" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="#121110"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+
+  <!-- Monogram -->
+  <rect x="80" y="76" width="84" height="84" rx="18" fill="#f2efea"/>
+  <text x="122" y="133" text-anchor="middle"
+        font-family="Georgia, 'Times New Roman', serif" font-size="40" fill="#121110">TR</text>
+
+  <!-- Name and role -->
+  <text x="80" y="330" font-family="Georgia, 'Times New Roman', serif"
+        font-size="82" fill="#f2efea">Tebit Ramson Titih</text>
+
+  <text x="80" y="392" font-family="Helvetica, Arial, sans-serif"
+        font-size="30" fill="#a8a199">HND Software Engineering student · Full-stack developer</text>
+
+  <text x="80" y="440" font-family="Helvetica, Arial, sans-serif"
+        font-size="30" fill="#a8a199">Douala, Cameroon</text>
+
+  <!-- Rule -->
+  <rect x="80" y="500" width="120" height="3" fill="#e8945f"/>
+
+  <text x="80" y="556" font-family="ui-monospace, 'Courier New', monospace"
+        font-size="24" fill="#8a837b" letter-spacing="3">PHP · MYSQL · LARAVEL · JAVASCRIPT</text>
+</svg>

@@ -1,0 +1,79 @@
+---
+import Icon from './Icon.astro';
+---
+<button
+  type="button"
+  class="theme-toggle"
+  id="theme-toggle"
+  aria-label="Switch to dark theme"
+  title="Switch theme"
+>
+  <span class="theme-toggle__icon theme-toggle__icon--sun"><Icon name="sun" size={17} /></span>
+  <span class="theme-toggle__icon theme-toggle__icon--moon"><Icon name="moon" size={17} /></span>
+</button>
+
+<style>
+  .theme-toggle {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+    flex: none;
+    transition:
+      color var(--duration-fast) var(--ease-out),
+      border-color var(--duration-fast) var(--ease-out);
+  }
+  .theme-toggle:hover { color: var(--text); border-color: var(--border-strong); }
+
+  /* Both icons occupy the same grid cell; only one is shown per theme. */
+  .theme-toggle__icon { grid-area: 1 / 1; display: grid; place-items: center; }
+  .theme-toggle__icon--moon { display: none; }
+  :root[data-theme='dark'] .theme-toggle__icon--sun { display: none; }
+  :root[data-theme='dark'] .theme-toggle__icon--moon { display: grid; }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) .theme-toggle__icon--sun { display: none; }
+    :root:not([data-theme='light']) .theme-toggle__icon--moon { display: grid; }
+  }
+</style>
+
+<script>
+  const root = document.documentElement;
+  const button = document.getElementById('theme-toggle');
+
+  /** The theme actually in effect right now, explicit choice or OS preference. */
+  function resolved(): 'light' | 'dark' {
+    const explicit = root.getAttribute('data-theme');
+    if (explicit === 'light' || explicit === 'dark') return explicit;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+
+  function syncLabel() {
+    const next = resolved() === 'dark' ? 'light' : 'dark';
+    button?.setAttribute('aria-label', `Switch to ${next} theme`);
+  }
+
+  button?.addEventListener('click', () => {
+    const next = resolved() === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try {
+      localStorage.setItem('theme', next);
+    } catch {
+      /* Storage unavailable — the choice still applies for this page view. */
+    }
+    syncLabel();
+  });
+
+  // Keep the label correct if the OS preference changes while the page is open
+  // and the visitor has not made an explicit choice.
+  window
+    .matchMedia('(prefers-color-scheme: dark)')
+    .addEventListener('change', syncLabel);
+
+  syncLabel();
+</script>

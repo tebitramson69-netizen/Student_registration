@@ -1,0 +1,28 @@
+---
+interface Props {
+  eyebrow: string;
+  title: string;
+  lead?: string;
+  /** Rendering level. Defaults to h2 — only the hero should be h1. */
+  as?: 'h1' | 'h2';
+  id?: string;
+}
+const { eyebrow, title, lead, as: Tag = 'h2', id } = Astro.props;
+---
+<div class="section-heading" data-reveal>
+  <p class="eyebrow">{eyebrow}</p>
+  <Tag id={id} class="section-heading__title">{title}</Tag>
+  {lead && <p class="section-heading__lead">{lead}</p>}
+</div>
+
+<style>
+  .section-heading { max-width: var(--width-prose); margin-bottom: var(--space-xl); }
+  .section-heading__title { margin-top: var(--space-2xs); }
+  .section-heading__lead {
+    margin-top: var(--space-s);
+    color: var(--text-muted);
+    font-size: var(--step-1);
+    line-height: 1.5;
+    max-width: 55ch;
+  }
+</style>

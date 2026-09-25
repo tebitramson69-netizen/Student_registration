@@ -1,0 +1,144 @@
+---
+import Base from '../layouts/Base.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import Icon from '../components/Icon.astro';
+import { profile } from '../data/site';
+import { url } from '../lib/url';
+---
+<Base
+  title="About"
+  description="How Tebit Ramson Titih went from a first CRUD form to building a school management platform and a Laravel media pipeline — and what he is trying to get good at next."
+>
+  <article class="section">
+    <div class="page">
+      <SectionHeading
+        eyebrow="About"
+        title="I got here by building the wrong thing first."
+        as="h1"
+        lead="A short, honest account of where I am, how I work, and what I am aiming at."
+      />
+
+      <div class="prose story">
+        <p data-reveal>
+          I am an HND Software Engineering student at <strong>Saint Louis University
+          Institute in Douala</strong>. That is the formal version. The useful version is
+          that I started writing PHP because I wanted to see a form I had typed put a
+          row into a database, and I have not really stopped since.
+        </p>
+
+        <p data-reveal>
+          The first thing I finished was a student registration system — a form, a
+          table, search, sorting, pagination, a CSV export. It worked. It was also,
+          I now know, full of the exact mistakes every beginner makes: SQL built by
+          string concatenation, database credentials committed to the repository,
+          and a delete route that anyone who could guess a URL could fire. I have
+          kept it public. It is the clearest evidence I have that I learn.
+        </p>
+
+        <h2 data-reveal>The problem I keep coming back to</h2>
+
+        <p data-reveal>
+          Cameroonian secondary schools grade on a system that imported software
+          consistently gets wrong. Marks out of twenty. Three terms of two sequences
+          each. And every subject carrying its own ministry-set coefficient, so a
+          student's average is a weighted mean, not a plain one. Software built
+          around a 0–100 scale does not merely look foreign here — it produces
+          incorrect report cards.
+        </p>
+
+        <p data-reveal>
+          So most of that work is still done by hand, with a calculator and a stack
+          of mark sheets, for days at a time every term. My School Management System
+          is my attempt at the version that understands the local model properly.
+          It is the project I care most about, and the one that has taught me the
+          most about what happens when your data model does not match reality.
+        </p>
+
+        <h2 data-reveal>How I work</h2>
+
+        <p data-reveal>
+          <strong>I start with the schema.</strong> Before any controller exists I
+          want to know what the tables are, what is unique, what cascades, and which
+          invariants the database should enforce rather than trust me to remember.
+          Most of the bugs I have had to fix late were decisions I made too quickly
+          early.
+        </p>
+
+        <p data-reveal>
+          <strong>I audit my own code.</strong> Partway through the school system I
+          stopped adding features and reviewed everything as though someone else had
+          written it. I found duplicated averaging logic in three places, a ranking
+          computed from a different number than the one displayed, and file names
+          whose casing would break the moment the project met a Linux server. That
+          list is published in the repository. Writing it down was uncomfortable and
+          it is the only reason those things got fixed.
+        </p>
+
+        <p data-reveal>
+          <strong>I prefer the simple tool.</strong> The school system deliberately
+          uses no framework, because its real deployment target is a school with
+          shared Apache hosting and no developer on staff — there, a build step is a
+          failure mode. The video studio uses Laravel, because queues, migrations and
+          policies were genuinely the problem. The stack should follow the constraint,
+          not the fashion.
+        </p>
+
+        <p data-reveal>
+          <strong>I use AI as a reviewer, not an author.</strong> It is very good at
+          finding the thing I missed at one in the morning and very bad at knowing
+          what a Cameroonian report card has to contain. I read everything before it
+          lands.
+        </p>
+
+        <h2 data-reveal>Where I am going</h2>
+
+        <p data-reveal>
+          I want to work somewhere my code is reviewed by people better than me. I
+          am looking for an internship or a junior backend role — locally or
+          remotely, and I am open to opportunities outside Cameroon. What I bring
+          right now is not seniority: it is that I finish things, I go back and fix
+          what I got wrong, and I can hold a non-trivial domain in my head long
+          enough to model it properly.
+        </p>
+
+        <p data-reveal>
+          Next on the list: getting genuinely fluent with automated testing beyond
+          what I have already written, and learning to deploy and operate something
+          on real infrastructure rather than on XAMPP.
+        </p>
+      </div>
+
+      <div class="about__cta" data-reveal>
+        <a class="button button--primary" href={url('/projects')}>
+          Read the case studies
+          <Icon name="arrow" size={16} />
+        </a>
+        <a class="button button--secondary" href={url('/resume')}>Experience &amp; education</a>
+        <a class="button button--secondary" href={`mailto:${profile.email}`}>Email me</a>
+      </div>
+    </div>
+  </article>
+</Base>
+
+<style>
+  .story { --flow: var(--space-m); }
+  .story > * + * { margin-top: var(--flow); }
+  .story p { color: var(--text-muted); }
+  .story strong { color: var(--text); font-weight: 580; }
+
+  .story h2 {
+    margin-top: var(--space-xl);
+    font-size: var(--step-2);
+    padding-top: var(--space-s);
+    border-top: 1px solid var(--border);
+  }
+
+  .about__cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+    margin-top: var(--space-2xl);
+    padding-top: var(--space-l);
+    border-top: 1px solid var(--border);
+  }
+</style>

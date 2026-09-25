@@ -1,0 +1,332 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Portrait from '../components/Portrait.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import Icon from '../components/Icon.astro';
+import { profile, verifiedSocials, skillGroups } from '../data/site';
+import { url } from '../lib/url';
+
+const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+const featured = projects.filter((p) => p.data.featured);
+---
+<Base
+  title={profile.name}
+  description={profile.summary}
+  includePersonSchema
+>
+  <!-- ===================================================================
+       HERO — who, what, why keep reading
+       =================================================================== -->
+  <section class="hero">
+    <div class="page hero__inner">
+      <div class="hero__text">
+        <p class="hero__status" data-reveal>
+          <span class="hero__dot" aria-hidden="true"></span>
+          Open to internships and junior roles
+        </p>
+
+        <h1 class="hero__name" data-reveal style="--reveal-delay:60ms">
+          {profile.name}
+        </h1>
+
+        <p class="hero__role" data-reveal style="--reveal-delay:120ms">
+          HND Software Engineering student<span class="hero__sep" aria-hidden="true">·</span>
+          Full-stack developer<span class="hero__sep" aria-hidden="true">·</span>
+          Douala, Cameroon
+        </p>
+
+        <p class="hero__tagline" data-reveal style="--reveal-delay:180ms">
+          {profile.tagline}
+        </p>
+
+        <p class="hero__body" data-reveal style="--reveal-delay:220ms">
+          Most of what I build is unglamorous and load-bearing: schemas that hold up,
+          authentication that actually authenticates, and arithmetic that gives the
+          same answer on every page it appears. I am looking for the work where those
+          things matter.
+        </p>
+
+        <div class="hero__actions" data-reveal style="--reveal-delay:280ms">
+          <a class="button button--primary" href={url('/projects')}>
+            See what I have built
+            <Icon name="arrow" size={16} />
+          </a>
+          <a class="button button--secondary" href={url('/contact')}>Get in touch</a>
+        </div>
+
+        <ul class="hero__socials" data-reveal style="--reveal-delay:340ms">
+          {verifiedSocials.map((social) => (
+            <li>
+              <a
+                href={social.href}
+                target={social.href.startsWith('http') ? '_blank' : undefined}
+                rel={social.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+              >
+                <Icon name={social.icon} size={16} />
+                <span>{social.label}</span>
+                {social.href.startsWith('http') && (
+                  <span class="visually-hidden">(opens in a new tab)</span>
+                )}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <Portrait />
+    </div>
+  </section>
+
+  <!-- ===================================================================
+       PROOF — the work, first and prominent
+       =================================================================== -->
+  <section class="section section--sunken" id="work">
+    <div class="page">
+      <SectionHeading
+        eyebrow="Selected work"
+        title="Two systems I designed, built and had to live with"
+        lead="Not demos. Both are real applications with a schema, a security model and a list of things still wrong with them — which I have written down."
+      />
+
+      <div class="grid-projects">
+        {featured.map((project, i) => (
+          <ProjectCard project={project} index={i} />
+        ))}
+      </div>
+
+      <p class="section__more" data-reveal>
+        <a href={url('/projects')} class="link-arrow">
+          All projects, including the one I built first
+          <Icon name="arrow" size={16} />
+        </a>
+      </p>
+    </div>
+  </section>
+
+  <!-- ===================================================================
+       CAPABILITY — what I know, honestly scoped
+       =================================================================== -->
+  <section class="section" id="skills">
+    <div class="page">
+      <SectionHeading
+        eyebrow="Capability"
+        title="What I actually work with"
+        lead="A short list on purpose. Everything here is something I have used to build one of the projects on this site, or use every working day."
+      />
+
+      <div class="grid-skills">
+        {skillGroups.map((group, i) => (
+          <div class="skill-group" data-reveal style={`--reveal-delay:${i * 70}ms`}>
+            <h3 class="skill-group__title">{group.title}</h3>
+            <p class="skill-group__note">{group.note}</p>
+            <ul class="skill-group__list">
+              {group.items.map((item) => (
+                <li>
+                  <span class="skill-group__name">{item.name}</span>
+                  <span class="skill-group__detail">{item.detail}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================================
+       OPPORTUNITY
+       =================================================================== -->
+  <section class="section section--sunken">
+    <div class="page cta">
+      <div class="cta__text" data-reveal>
+        <p class="eyebrow">What next</p>
+        <h2 class="cta__title">I am looking for the work that makes me better.</h2>
+        <p class="cta__body">
+          An internship, a junior backend role, an open-source project that needs
+          someone patient with a database. If you are hiring or building something,
+          I would like to hear about it.
+        </p>
+      </div>
+      <div class="cta__actions" data-reveal style="--reveal-delay:80ms">
+        <a class="button button--primary" href={url('/contact')}>
+          Start a conversation
+          <Icon name="arrow" size={16} />
+        </a>
+        <a class="button button--secondary" href={url('/about')}>More about me</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* ===================== Hero ===================== */
+  .hero { padding-block: clamp(2.5rem, 1rem + 7vw, 6rem) var(--section-y); }
+
+  .hero__inner {
+    display: grid;
+    gap: var(--space-xl);
+    align-items: center;
+  }
+  @media (min-width: 62em) {
+    .hero__inner { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: var(--space-2xl); }
+  }
+
+  .hero__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: var(--radius-full);
+    padding: 0.3em 0.85em;
+  }
+  .hero__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: var(--radius-full);
+    background: var(--accent);
+    flex: none;
+  }
+
+  .hero__name {
+    font-size: var(--step-5);
+    margin-top: var(--space-s);
+    font-weight: 480;
+  }
+
+  .hero__role {
+    margin-top: var(--space-2xs);
+    font-size: var(--step-0);
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+  .hero__sep { margin-inline: 0.5em; color: var(--accent); }
+
+  .hero__tagline {
+    margin-top: var(--space-m);
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    line-height: 1.35;
+    letter-spacing: var(--tracking-tight);
+    max-width: 28ch;
+  }
+
+  .hero__body {
+    margin-top: var(--space-s);
+    color: var(--text-muted);
+    max-width: 52ch;
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+    margin-top: var(--space-l);
+  }
+
+  .hero__socials {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-m);
+    margin-top: var(--space-l);
+    padding-top: var(--space-s);
+    border-top: 1px solid var(--border);
+    list-style: none;
+    padding-inline: 0;
+  }
+  .hero__socials a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45em;
+    font-size: var(--step--1);
+    color: var(--text-muted);
+    text-decoration: none;
+    padding-block: 0.3rem;
+  }
+  .hero__socials a:hover { color: var(--accent-ink); }
+
+  /* ===================== Grids ===================== */
+  .grid-projects {
+    display: grid;
+    gap: var(--space-m);
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 46em) {
+    .grid-projects { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+  .section__more { margin-top: var(--space-xl); }
+
+  .link-arrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    font-size: var(--step--1);
+    font-weight: 540;
+    text-decoration: none;
+    color: var(--text);
+    border-bottom: 1px solid var(--border-strong);
+    padding-bottom: 0.2em;
+    transition: gap var(--duration-base) var(--ease-out), color var(--duration-fast) var(--ease-out);
+  }
+  .link-arrow:hover { gap: 0.85em; color: var(--accent-ink); border-bottom-color: currentColor; }
+
+  /* ===================== Skills ===================== */
+  .grid-skills {
+    display: grid;
+    gap: var(--space-l);
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 38em) { .grid-skills { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 64em) { .grid-skills { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+  .skill-group__title {
+    font-size: var(--step-1);
+    padding-bottom: var(--space-2xs);
+    border-bottom: 1px solid var(--border);
+  }
+  .skill-group__note {
+    margin-top: var(--space-2xs);
+    font-size: var(--step--2);
+    color: var(--text-subtle);
+    font-style: italic;
+  }
+  .skill-group__list {
+    margin-top: var(--space-s);
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: var(--space-xs);
+  }
+  .skill-group__name {
+    display: block;
+    font-size: var(--step--1);
+    font-weight: 560;
+  }
+  .skill-group__detail {
+    display: block;
+    font-size: var(--step--2);
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  /* ===================== CTA ===================== */
+  .cta {
+    display: grid;
+    gap: var(--space-l);
+    align-items: end;
+  }
+  @media (min-width: 52em) {
+    .cta { grid-template-columns: minmax(0, 1.4fr) auto; gap: var(--space-2xl); }
+  }
+  .cta__title { margin-top: var(--space-2xs); max-width: 20ch; }
+  .cta__body { margin-top: var(--space-s); color: var(--text-muted); max-width: 48ch; }
+  .cta__actions { display: flex; flex-wrap: wrap; gap: var(--space-2xs); }
+</style>

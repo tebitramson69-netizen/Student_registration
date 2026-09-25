@@ -1,0 +1,56 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  image?: string;
+  type?: 'website' | 'article';
+  includePersonSchema?: boolean;
+}
+const props = Astro.props;
+---
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    <BaseHead {...props} />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Header />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+
+    <script>
+      /**
+       * Section entrance animation.
+       *
+       * Everything is visible by default in CSS when JS is unavailable, and the
+       * observer is not created at all when the visitor prefers reduced motion —
+       * so this can only ever add polish, never withhold content.
+       */
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const targets = document.querySelectorAll('[data-reveal]');
+
+      if (reduced || !('IntersectionObserver' in window)) {
+        targets.forEach((el) => el.classList.add('is-revealed'));
+      } else {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              entry.target.classList.add('is-revealed');
+              observer.unobserve(entry.target); // reveal once, then stop watching
+            });
+          },
+          { rootMargin: '0px 0px -8% 0px', threshold: 0.08 },
+        );
+        targets.forEach((el) => observer.observe(el));
+      }
+    </script>
+  </body>
+</html>

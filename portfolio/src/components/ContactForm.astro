@@ -1,0 +1,276 @@
+---
+import { profile } from '../data/site';
+import Icon from './Icon.astro';
+
+/**
+ * Contact form.
+ *
+ * There is no server in this project, so the form posts to a third-party
+ * form-relay endpoint configured through PUBLIC_CONTACT_ENDPOINT. That URL is a
+ * write-only intake address, not a credential — nothing secret is ever shipped
+ * to the browser, and no mailbox is exposed.
+ *
+ * When the endpoint is not configured, the form is replaced by a direct email
+ * link rather than being rendered as a control that silently does nothing.
+ */
+const endpoint = import.meta.env.PUBLIC_CONTACT_ENDPOINT;
+---
+{endpoint ? (
+  <form class="contact-form" id="contact-form" method="post" action={endpoint} novalidate>
+    <div class="contact-form__row">
+      <div class="field">
+        <label for="cf-name">Your name</label>
+        <input
+          id="cf-name"
+          name="name"
+          type="text"
+          autocomplete="name"
+          required
+          maxlength="120"
+          aria-describedby="cf-name-error"
+        />
+        <p class="field__error" id="cf-name-error" hidden></p>
+      </div>
+
+      <div class="field">
+        <label for="cf-email">Email</label>
+        <input
+          id="cf-email"
+          name="email"
+          type="email"
+          autocomplete="email"
+          required
+          maxlength="200"
+          aria-describedby="cf-email-error"
+        />
+        <p class="field__error" id="cf-email-error" hidden></p>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="cf-subject">Subject</label>
+      <input id="cf-subject" name="subject" type="text" maxlength="160" />
+    </div>
+
+    <div class="field">
+      <label for="cf-message">Message</label>
+      <textarea
+        id="cf-message"
+        name="message"
+        rows="6"
+        required
+        minlength="10"
+        maxlength="4000"
+        aria-describedby="cf-message-error cf-message-hint"
+      ></textarea>
+      <p class="field__hint" id="cf-message-hint">Ten characters or more. No attachments — send those by email.</p>
+      <p class="field__error" id="cf-message-error" hidden></p>
+    </div>
+
+    {/* Honeypot: invisible to people, irresistible to naive bots. Never remove. */}
+    <div class="honeypot" aria-hidden="true">
+      <label for="cf-company">Company (leave this field empty)</label>
+      <input id="cf-company" name="_gotcha" type="text" tabindex="-1" autocomplete="off" />
+    </div>
+
+    <div class="contact-form__actions">
+      <button type="submit" class="button button--primary" id="cf-submit">
+        Send message
+        <Icon name="arrow" size={16} />
+      </button>
+      <p class="contact-form__privacy">
+        Your message goes to my inbox and nowhere else.
+      </p>
+    </div>
+
+    {/* Status is announced to assistive technology as it changes. */}
+    <p class="contact-form__status" id="cf-status" role="status" aria-live="polite" hidden></p>
+  </form>
+) : (
+  <div class="contact-fallback">
+    <p class="contact-fallback__lead">
+      The quickest way to reach me is a direct email — I read everything and reply to anything real.
+    </p>
+    <a class="button button--primary" href={`mailto:${profile.email}`}>
+      <Icon name="mail" size={16} />
+      {profile.email}
+    </a>
+    <p class="contact-fallback__note">
+      <strong>Owner note:</strong> set <code>PUBLIC_CONTACT_ENDPOINT</code> in <code>.env</code>
+      to swap this for a full contact form. See the README.
+    </p>
+  </div>
+)}
+
+<style>
+  .contact-form { display: grid; gap: var(--space-m); max-width: 36rem; }
+
+  .contact-form__row { display: grid; gap: var(--space-m); }
+  @media (min-width: 34em) {
+    .contact-form__row { grid-template-columns: 1fr 1fr; }
+  }
+
+  .field { display: grid; gap: var(--space-3xs); }
+  .field label { font-size: var(--step--1); font-weight: 540; }
+
+  .field input,
+  .field textarea {
+    width: 100%;
+    padding: 0.7rem 0.85rem;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-m);
+    font-size: var(--step-0);
+    transition: border-color var(--duration-fast) var(--ease-out);
+  }
+  .field input:hover,
+  .field textarea:hover { border-color: var(--text-subtle); }
+  .field textarea { resize: vertical; min-height: 8rem; }
+
+  .field input[aria-invalid='true'],
+  .field textarea[aria-invalid='true'] { border-color: var(--accent-ink); }
+
+  .field__hint { font-size: var(--step--2); color: var(--text-subtle); }
+  .field__error { font-size: var(--step--2); color: var(--accent-ink); font-weight: 520; }
+
+  /* Off-screen rather than display:none — some bots skip hidden inputs. */
+  .honeypot {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .contact-form__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-s);
+  }
+  .contact-form__privacy { font-size: var(--step--2); color: var(--text-subtle); }
+
+  .contact-form__status {
+    padding: var(--space-xs) var(--space-s);
+    border-radius: var(--radius-m);
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    font-size: var(--step--1);
+  }
+  .contact-form__status[data-state='success'] { border-color: var(--accent); background: var(--accent-soft); }
+  .contact-form__status[data-state='error'] { border-color: var(--accent-ink); }
+
+  button[disabled] { opacity: 0.6; cursor: progress; }
+
+  /* --- Fallback --------------------------------------------------------- */
+  .contact-fallback { display: grid; gap: var(--space-s); justify-items: start; max-width: 36rem; }
+  .contact-fallback__lead { color: var(--text-muted); }
+  .contact-fallback__note {
+    font-size: var(--step--2);
+    color: var(--text-subtle);
+    padding: var(--space-2xs) var(--space-xs);
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius-s);
+  }
+  .contact-fallback__note code { font-family: var(--font-mono); font-size: 0.95em; }
+</style>
+
+<script>
+  const form = document.getElementById('contact-form') as HTMLFormElement | null;
+
+  if (form) {
+    const status = document.getElementById('cf-status')!;
+    const submit = document.getElementById('cf-submit') as HTMLButtonElement;
+
+    /**
+     * Client-side validation is a courtesy, not a security control — the relay
+     * endpoint validates again. Its only job here is a fast, clear error.
+     */
+    const rules: Record<string, (value: string) => string | null> = {
+      name: (v) => (v.trim().length < 2 ? 'Please tell me your name.' : null),
+      email: (v) =>
+        // Deliberately permissive: the only authority on a valid address is
+        // whether mail to it arrives.
+        /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim()) ? null : 'That email address does not look right.',
+      message: (v) =>
+        v.trim().length < 10 ? 'A little more detail, please — at least ten characters.' : null,
+    };
+
+    function validateField(name: string): boolean {
+      const input = form!.elements.namedItem(name) as HTMLInputElement | HTMLTextAreaElement | null;
+      const error = document.getElementById(`cf-${name}-error`);
+      if (!input || !error) return true;
+
+      const message = rules[name]?.(input.value) ?? null;
+      error.textContent = message ?? '';
+      error.hidden = message === null;
+      input.setAttribute('aria-invalid', String(message !== null));
+      return message === null;
+    }
+
+    // Validate on blur; re-validate on input only once a field is already wrong,
+    // so nobody is scolded mid-word.
+    Object.keys(rules).forEach((name) => {
+      const input = form.elements.namedItem(name) as HTMLElement | null;
+      input?.addEventListener('blur', () => validateField(name));
+      input?.addEventListener('input', () => {
+        if (input.getAttribute('aria-invalid') === 'true') validateField(name);
+      });
+    });
+
+    function show(state: 'success' | 'error', message: string) {
+      status.textContent = message;
+      status.dataset.state = state;
+      status.hidden = false;
+    }
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const valid = Object.keys(rules).map(validateField).every(Boolean);
+      if (!valid) {
+        show('error', 'Please fix the highlighted fields and try again.');
+        (form.querySelector('[aria-invalid="true"]') as HTMLElement | null)?.focus();
+        return;
+      }
+
+      // Honeypot tripped: pretend everything is fine and send nothing.
+      const honeypot = form.elements.namedItem('_gotcha') as HTMLInputElement | null;
+      if (honeypot?.value) {
+        show('success', 'Thank you — your message has been sent.');
+        form.reset();
+        return;
+      }
+
+      submit.disabled = true;
+      const original = submit.textContent;
+      submit.textContent = 'Sending…';
+      status.hidden = true;
+
+      try {
+        const response = await fetch(form.action, {
+          method: 'POST',
+          body: new FormData(form),
+          headers: { Accept: 'application/json' },
+        });
+
+        if (!response.ok) throw new Error(`Request failed: ${response.status}`);
+
+        show('success', 'Thank you — your message is on its way. I usually reply within a couple of days.');
+        form.reset();
+        Object.keys(rules).forEach((name) => {
+          (form.elements.namedItem(name) as HTMLElement | null)?.removeAttribute('aria-invalid');
+        });
+      } catch {
+        // Never surface the raw error to a visitor; give them a way through instead.
+        show(
+          'error',
+          'Something went wrong sending that. Please email me directly and I will pick it up there.',
+        );
+      } finally {
+        submit.disabled = false;
+        submit.textContent = original;
+      }
+    });
+  }
+</script>

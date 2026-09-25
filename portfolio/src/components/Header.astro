@@ -1,0 +1,232 @@
+---
+import { nav, profile } from '../data/site';
+import { url, isCurrent } from '../lib/url';
+import ThemeToggle from './ThemeToggle.astro';
+import Icon from './Icon.astro';
+
+const path = Astro.url.pathname;
+---
+<header class="site-header">
+  <div class="page site-header__inner">
+    <a class="wordmark" href={url('/')} aria-label={`${profile.name} — home`}>
+      <span class="wordmark__mark" aria-hidden="true">{profile.initials}</span>
+      <span class="wordmark__text">
+        <span class="wordmark__name">{profile.name}</span>
+        <span class="wordmark__role">Software Engineer in training</span>
+      </span>
+    </a>
+
+    <nav class="site-nav" id="site-nav" aria-label="Primary">
+      <ul class="site-nav__list">
+        {nav.map((item) => (
+          <li>
+            <a
+              href={url(item.href)}
+              class="site-nav__link"
+              aria-current={isCurrent(path, url(item.href)) ? 'page' : undefined}
+            >
+              {item.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="site-header__actions">
+      <ThemeToggle />
+      <button
+        type="button"
+        class="nav-toggle"
+        id="nav-toggle"
+        aria-expanded="false"
+        aria-controls="site-nav"
+        aria-label="Open menu"
+      >
+        <span class="nav-toggle__open"><Icon name="menu" size={20} /></span>
+        <span class="nav-toggle__close"><Icon name="close" size={20} /></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: color-mix(in srgb, var(--bg) 86%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid transparent;
+    transition: border-color var(--duration-base) var(--ease-out);
+  }
+  /* The rule only appears once the page has scrolled — it is a scroll cue, not decoration. */
+  .site-header[data-scrolled='true'] { border-bottom-color: var(--border); }
+
+  .site-header__inner {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+    min-height: 68px;
+  }
+
+  /* --- Wordmark --------------------------------------------------------- */
+  .wordmark {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    text-decoration: none;
+    margin-right: auto;
+    min-width: 0;
+  }
+  .wordmark__mark {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    flex: none;
+    border-radius: var(--radius-s);
+    background: var(--text);
+    color: var(--bg);
+    font-family: var(--font-display);
+    font-size: 0.82rem;
+    font-weight: 560;
+    letter-spacing: 0.01em;
+    transition: background-color var(--duration-fast) var(--ease-out);
+  }
+  .wordmark:hover .wordmark__mark { background: var(--accent-ink); color: var(--accent-contrast); }
+
+  .wordmark__text { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+  .wordmark__name {
+    font-family: var(--font-display);
+    font-size: var(--step--1);
+    font-weight: 520;
+    letter-spacing: var(--tracking-tight);
+    white-space: nowrap;
+  }
+  .wordmark__role {
+    font-size: 0.66rem;
+    color: var(--text-subtle);
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+  }
+
+  /* --- Navigation ------------------------------------------------------- */
+  .site-nav__list {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3xs);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .site-nav__link {
+    display: block;
+    padding: 0.45rem 0.7rem;
+    border-radius: var(--radius-s);
+    font-size: var(--step--1);
+    font-weight: 480;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition:
+      color var(--duration-fast) var(--ease-out),
+      background-color var(--duration-fast) var(--ease-out);
+  }
+  .site-nav__link:hover { color: var(--text); background: var(--bg-sunken); }
+  .site-nav__link[aria-current='page'] { color: var(--text); font-weight: 560; }
+
+  .site-header__actions { display: flex; align-items: center; gap: var(--space-2xs); flex: none; }
+
+  /* --- Mobile toggle ---------------------------------------------------- */
+  .nav-toggle {
+    display: none;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+  }
+  .nav-toggle__close { display: none; }
+  .nav-toggle[aria-expanded='true'] .nav-toggle__open { display: none; }
+  .nav-toggle[aria-expanded='true'] .nav-toggle__close { display: block; }
+
+  /* The breakpoint is set by content, not by a device: this is where the
+     wordmark and five nav items stop fitting on one line. */
+  @media (max-width: 47.99em) {
+    .nav-toggle { display: grid; }
+
+    .site-nav {
+      position: absolute;
+      inset-inline: 0;
+      top: 100%;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      box-shadow: var(--shadow-m);
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows var(--duration-base) var(--ease-out);
+    }
+    .site-nav__list {
+      overflow: hidden;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+      padding-inline: var(--gutter);
+    }
+    .site-nav[data-open='true'] { grid-template-rows: 1fr; }
+    .site-nav[data-open='true'] .site-nav__list { padding-block: var(--space-2xs) var(--space-s); }
+
+    .site-nav__link {
+      padding: 0.8rem 0.25rem;
+      font-size: var(--step-0);
+      border-bottom: 1px solid var(--border);
+    }
+    .site-nav__list li:last-child .site-nav__link { border-bottom: 0; }
+
+    .wordmark__role { display: none; }
+  }
+
+  @media (max-width: 22.5em) {
+    .wordmark__name { font-size: 0.82rem; }
+  }
+</style>
+
+<script>
+  const header = document.querySelector<HTMLElement>('.site-header');
+  const toggle = document.getElementById('nav-toggle');
+  const menu = document.getElementById('site-nav');
+
+  function close() {
+    menu?.setAttribute('data-open', 'false');
+    toggle?.setAttribute('aria-expanded', 'false');
+    toggle?.setAttribute('aria-label', 'Open menu');
+  }
+
+  toggle?.addEventListener('click', () => {
+    const open = toggle.getAttribute('aria-expanded') === 'true';
+    if (open) {
+      close();
+    } else {
+      menu?.setAttribute('data-open', 'true');
+      toggle.setAttribute('aria-expanded', 'true');
+      toggle.setAttribute('aria-label', 'Close menu');
+    }
+  });
+
+  // Escape closes the menu and returns focus to the control that opened it.
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && toggle?.getAttribute('aria-expanded') === 'true') {
+      close();
+      toggle.focus();
+    }
+  });
+
+  // Navigating to an in-page anchor should not leave the menu hanging open.
+  menu?.querySelectorAll('a').forEach((link) => link.addEventListener('click', close));
+
+  const onScroll = () => header?.setAttribute('data-scrolled', String(window.scrollY > 8));
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+</script>

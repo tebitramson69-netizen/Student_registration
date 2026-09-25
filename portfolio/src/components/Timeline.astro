@@ -1,0 +1,116 @@
+---
+import type { TimelineEntry } from '../data/site';
+
+interface Props {
+  entries: TimelineEntry[];
+}
+const { entries } = Astro.props;
+---
+<ol class="timeline">
+  {entries.map((entry, i) => (
+    <li class="timeline__item" data-reveal style={`--reveal-delay:${i * 80}ms`}>
+      <div class="timeline__marker" aria-hidden="true"></div>
+      <div class="timeline__content">
+        <p class="timeline__period">{entry.period}</p>
+        <h3 class="timeline__title">{entry.title}</h3>
+        <p class="timeline__org">
+          {entry.organisation}
+          <span class="timeline__sep" aria-hidden="true">·</span>
+          <span class="timeline__location">{entry.location}</span>
+        </p>
+        <p class="timeline__summary">{entry.summary}</p>
+
+        {entry.points && (
+          <ul class="timeline__points">
+            {entry.points.map((point) => <li>{point}</li>)}
+          </ul>
+        )}
+
+        {entry.tags && (
+          <ul class="tag-list timeline__tags">
+            {entry.tags.map((t) => <li class="tag">{t}</li>)}
+          </ul>
+        )}
+
+        {entry.todo && (
+          <p class="timeline__todo">
+            <strong>Owner note:</strong> {entry.todo}
+          </p>
+        )}
+      </div>
+    </li>
+  ))}
+</ol>
+
+<style>
+  .timeline { list-style: none; padding: 0; display: grid; gap: var(--space-xl); }
+
+  .timeline__item {
+    position: relative;
+    padding-left: var(--space-m);
+    border-left: 1px solid var(--border);
+  }
+
+  .timeline__marker {
+    position: absolute;
+    left: 0;
+    top: 0.5rem;
+    width: 9px;
+    height: 9px;
+    border-radius: var(--radius-full);
+    background: var(--accent);
+    transform: translateX(-5px);
+    box-shadow: 0 0 0 4px var(--bg);
+  }
+
+  .timeline__period {
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--accent-ink);
+  }
+
+  .timeline__title { font-size: var(--step-1); margin-top: var(--space-3xs); }
+
+  .timeline__org { font-size: var(--step--1); color: var(--text); font-weight: 520; }
+  .timeline__sep { margin-inline: 0.4em; color: var(--text-subtle); }
+  .timeline__location { color: var(--text-muted); font-weight: 400; }
+
+  .timeline__summary {
+    margin-top: var(--space-2xs);
+    color: var(--text-muted);
+    max-width: var(--measure);
+  }
+
+  .timeline__points {
+    margin-top: var(--space-s);
+    padding-left: 1.1em;
+    display: grid;
+    gap: var(--space-2xs);
+    color: var(--text-muted);
+    font-size: var(--step--1);
+    max-width: var(--measure);
+  }
+  .timeline__points li::marker { color: var(--accent); }
+
+  .timeline__tags { margin-top: var(--space-s); }
+
+  /* Deliberately visible: an unfinished section should look unfinished to its
+     owner rather than reading as a finished claim. */
+  .timeline__todo {
+    margin-top: var(--space-s);
+    padding: var(--space-2xs) var(--space-xs);
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius-s);
+    background: var(--bg-sunken);
+    color: var(--text-subtle);
+    font-size: var(--step--2);
+    max-width: var(--measure);
+  }
+  .timeline__todo strong { color: var(--text-muted); }
+
+  @media (min-width: 48em) {
+    .timeline__item { padding-left: var(--space-l); }
+  }
+</style>

@@ -1,0 +1,63 @@
+# Builds the Astro portfolio in `portfolio/` and publishes it to GitHub Pages.
+#
+# Before the first run: Settings → Pages → Source → "GitHub Actions".
+name: Deploy portfolio
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'portfolio/**'
+      - '.github/workflows/deploy-portfolio.yml'
+  workflow_dispatch:
+
+# Least privilege: read the repo, write Pages, and mint the deploy token.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never let two deploys race; let a newer push finish rather than cancelling it.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: portfolio
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: portfolio/package-lock.json
+
+      - run: npm ci
+
+      - name: Build
+        env:
+          # This repository serves a GitHub Pages *project* site, so the app
+          # lives under /Student_registration. Drop PUBLIC_BASE_PATH and change
+          # PUBLIC_SITE_URL when you move to a custom domain.
+          PUBLIC_SITE_URL: https://tebitramson69-netizen.github.io
+          PUBLIC_BASE_PATH: /Student_registration
+        run: npm run build
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: portfolio/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

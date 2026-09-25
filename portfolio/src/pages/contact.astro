@@ -1,0 +1,129 @@
+---
+import Base from '../layouts/Base.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import ContactForm from '../components/ContactForm.astro';
+import Icon from '../components/Icon.astro';
+import { profile, socials } from '../data/site';
+---
+<Base
+  title="Contact"
+  description="Get in touch with Tebit Ramson Titih — software engineering student and full-stack PHP developer based in Douala, Cameroon, open to internships and junior roles."
+>
+  <section class="section">
+    <div class="page">
+      <SectionHeading
+        eyebrow="Contact"
+        title="Tell me what you are building."
+        as="h1"
+        lead="Internships, junior backend roles, freelance work, or a project that needs another pair of hands — I read everything and reply to anything real."
+      />
+
+      <div class="contact">
+        <div class="contact__form" data-reveal>
+          <ContactForm />
+        </div>
+
+        <aside class="contact__aside" data-reveal style="--reveal-delay:90ms">
+          <h2 class="contact__aside-title">Direct</h2>
+          <ul class="contact__links">
+            {socials.map((social) => (
+              <li class={social.verified ? undefined : 'contact__links-pending'}>
+                {social.verified ? (
+                  <a
+                    href={social.href}
+                    target={social.href.startsWith('http') ? '_blank' : undefined}
+                    rel={social.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                  >
+                    <Icon name={social.icon} size={17} />
+                    <span>
+                      <span class="contact__link-label">{social.label}</span>
+                      <span class="contact__link-handle">{social.handle}</span>
+                    </span>
+                    {social.href.startsWith('http') && (
+                      <span class="visually-hidden">(opens in a new tab)</span>
+                    )}
+                  </a>
+                ) : (
+                  /* Rendered but not linked: an unverified URL should never
+                     become a link that goes nowhere. */
+                  <span>
+                    <Icon name={social.icon} size={17} />
+                    <span>
+                      <span class="contact__link-label">{social.label}</span>
+                      <span class="contact__link-handle">{social.handle}</span>
+                    </span>
+                  </span>
+                )}
+              </li>
+            ))}
+            <li>
+              <span>
+                <Icon name="location" size={17} />
+                <span>
+                  <span class="contact__link-label">Based in</span>
+                  <span class="contact__link-handle">{profile.location}</span>
+                </span>
+              </span>
+            </li>
+          </ul>
+
+          <p class="contact__note">
+            I am currently studying full time in Douala, so I am usually quickest to
+            reply in the evenings, West Africa Time.
+          </p>
+        </aside>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .contact { display: grid; gap: var(--space-2xl); align-items: start; }
+  @media (min-width: 56em) {
+    .contact { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: var(--space-2xl); }
+  }
+
+  .contact__aside-title {
+    font-size: var(--step-1);
+    padding-bottom: var(--space-2xs);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .contact__links { margin-top: var(--space-s); list-style: none; padding: 0; display: grid; gap: var(--space-xs); }
+  .contact__links a,
+  .contact__links > li > span {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65em;
+    text-decoration: none;
+    color: var(--text);
+    padding-block: 0.2rem;
+  }
+  .contact__links a:hover .contact__link-handle { color: var(--accent-ink); }
+  .contact__links svg { margin-top: 0.2em; color: var(--text-subtle); flex: none; }
+
+  .contact__link-label {
+    display: block;
+    font-size: var(--step--2);
+    font-family: var(--font-mono);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--text-subtle);
+  }
+  .contact__link-handle {
+    display: block;
+    font-size: var(--step--1);
+    word-break: break-word;
+  }
+
+  .contact__links-pending { opacity: 0.62; }
+  .contact__links-pending .contact__link-handle { font-style: italic; color: var(--text-subtle); }
+
+  .contact__note {
+    margin-top: var(--space-l);
+    padding-top: var(--space-s);
+    border-top: 1px solid var(--border);
+    font-size: var(--step--1);
+    color: var(--text-muted);
+  }
+</style>

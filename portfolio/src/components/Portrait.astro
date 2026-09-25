@@ -1,0 +1,86 @@
+---
+import { portrait, profile } from '../data/site';
+import { url } from '../lib/url';
+
+/**
+ * The hero portrait. When no photograph is available it renders a designed
+ * monogram instead of an empty frame or a stock face — the site should never
+ * imply a photo exists when it does not, and never invent a likeness.
+ */
+interface Props {
+  size?: 'hero' | 'inline';
+}
+const { size = 'hero' } = Astro.props;
+---
+<figure class={`portrait portrait--${size}`} data-reveal>
+  {portrait.available ? (
+    <img
+      class="portrait__image"
+      src={url(portrait.src)}
+      alt={portrait.alt}
+      width="520"
+      height="650"
+      fetchpriority="high"
+      decoding="async"
+    />
+  ) : (
+    <div class="portrait__placeholder" role="img" aria-label={`Monogram standing in for a photograph of ${profile.name}`}>
+      <span class="portrait__monogram" aria-hidden="true">{profile.initials}</span>
+      <span class="portrait__note">Photograph<br />to come</span>
+    </div>
+  )}
+</figure>
+
+<style>
+  .portrait { margin: 0; position: relative; }
+
+  .portrait--hero {
+    width: min(100%, 22rem);
+    justify-self: center;
+  }
+  @media (min-width: 62em) {
+    .portrait--hero { width: 100%; max-width: 24rem; justify-self: end; }
+  }
+
+  .portrait__image,
+  .portrait__placeholder {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    border-radius: var(--radius-l);
+    border: 1px solid var(--border);
+    object-fit: cover;
+    object-position: center 22%;
+    background: var(--bg-sunken);
+    box-shadow: var(--shadow-l);
+  }
+
+  .portrait__placeholder {
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: var(--space-xs);
+    background:
+      radial-gradient(90% 70% at 50% 8%, var(--accent-soft) 0%, transparent 72%),
+      var(--bg-sunken);
+    border-style: dashed;
+    border-color: var(--border-strong);
+  }
+
+  .portrait__monogram {
+    font-family: var(--font-display);
+    font-size: clamp(3.5rem, 12vw, 5rem);
+    line-height: 1;
+    letter-spacing: var(--tracking-tight);
+    color: var(--accent-ink);
+  }
+
+  .portrait__note {
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--text-subtle);
+    text-align: center;
+    line-height: 1.5;
+  }
+</style>

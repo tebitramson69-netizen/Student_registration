@@ -1,0 +1,134 @@
+/* ===========================================================================
+   Design tokens — the single source of truth for the visual system.
+   Every colour, type step, space step, radius and motion value used anywhere
+   in the site resolves to a variable defined here.
+
+   Colour strategy: one warm-neutral scale plus one accent (clay/terracotta).
+   The accent ships in two weights per theme — `--accent` for graphic use and
+   `--accent-ink` for text — so text on background always clears WCAG AA
+   (4.5:1) without forcing the graphic tone to be muddy.
+   =========================================================================== */
+
+:root {
+  color-scheme: light dark;
+
+  /* --- Type families ---------------------------------------------------- */
+  --font-display: 'Fraunces', ui-serif, Georgia, 'Times New Roman', serif;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
+    Roboto, Helvetica, Arial, sans-serif;
+  /* System mono: used only for technology labels and code. Costs no download. */
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas,
+    'Liberation Mono', monospace;
+
+  /* --- Type scale (fluid, 320px → 1280px viewport) ----------------------- */
+  --step--2: clamp(0.72rem, 0.70rem + 0.10vw, 0.78rem);
+  --step--1: clamp(0.84rem, 0.81rem + 0.14vw, 0.92rem);
+  --step-0: clamp(1rem, 0.96rem + 0.19vw, 1.09rem);
+  --step-1: clamp(1.18rem, 1.11rem + 0.35vw, 1.40rem);
+  --step-2: clamp(1.44rem, 1.31rem + 0.65vw, 1.85rem);
+  --step-3: clamp(1.76rem, 1.53rem + 1.14vw, 2.48rem);
+  --step-4: clamp(2.15rem, 1.77rem + 1.89vw, 3.33rem);
+  --step-5: clamp(2.62rem, 2.02rem + 3.01vw, 4.50rem);
+
+  --leading-tight: 1.08;
+  --leading-snug: 1.25;
+  --leading-normal: 1.65;
+  --tracking-tight: -0.022em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.08em;
+
+  /* --- Space scale ------------------------------------------------------- */
+  --space-3xs: 0.25rem;
+  --space-2xs: 0.5rem;
+  --space-xs: 0.75rem;
+  --space-s: 1rem;
+  --space-m: 1.5rem;
+  --space-l: 2rem;
+  --space-xl: 3rem;
+  --space-2xl: 4.5rem;
+  --space-3xl: 6.5rem;
+  --section-y: clamp(3.5rem, 2rem + 7vw, 7rem);
+
+  /* --- Layout ------------------------------------------------------------ */
+  --measure: 68ch;
+  --width-page: 72rem;
+  --width-prose: 44rem;
+  --gutter: clamp(1rem, 0.6rem + 2vw, 2.5rem);
+
+  /* --- Radii and elevation ---------------------------------------------- */
+  --radius-s: 6px;
+  --radius-m: 10px;
+  --radius-l: 16px;
+  --radius-full: 999px;
+
+  /* --- Motion ------------------------------------------------------------ */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast: 140ms;
+  --duration-base: 240ms;
+  --duration-slow: 520ms;
+
+  /* --- Colour: light theme (default) ------------------------------------ */
+  --bg: #fbfaf8;
+  --bg-sunken: #f4f1ec;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --text: #1a1817;
+  --text-muted: #5b564f;
+  --text-subtle: #7d766d;
+  --border: #e4e0d9;
+  --border-strong: #cfc9c0;
+  --accent: #b1512a;
+  --accent-ink: #94411f;
+  --accent-soft: #f6ece5;
+  --accent-contrast: #ffffff;
+  --focus: #1a1817;
+  --shadow-s: 0 1px 2px rgb(26 24 23 / 0.05);
+  --shadow-m: 0 4px 14px -6px rgb(26 24 23 / 0.12);
+  --shadow-l: 0 18px 40px -20px rgb(26 24 23 / 0.22);
+}
+
+/* --- Colour: dark theme ------------------------------------------------- */
+/* Applied when the visitor's OS prefers dark AND they have not chosen light. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #121110;
+    --bg-sunken: #0c0b0b;
+    --surface: #1a1918;
+    --surface-raised: #232120;
+    --text: #f2efea;
+    --text-muted: #a8a199;
+    --text-subtle: #8a837b;
+    --border: #2d2a27;
+    --border-strong: #423e3a;
+    --accent: #e8945f;
+    --accent-ink: #f0a877;
+    --accent-soft: #2a201a;
+    --accent-contrast: #1a1211;
+    --focus: #f2efea;
+    --shadow-s: 0 1px 2px rgb(0 0 0 / 0.4);
+    --shadow-m: 0 4px 14px -6px rgb(0 0 0 / 0.55);
+    --shadow-l: 0 18px 40px -20px rgb(0 0 0 / 0.75);
+  }
+}
+
+/* Explicit opt-in to dark, regardless of OS preference. */
+:root[data-theme='dark'] {
+  --bg: #121110;
+  --bg-sunken: #0c0b0b;
+  --surface: #1a1918;
+  --surface-raised: #232120;
+  --text: #f2efea;
+  --text-muted: #a8a199;
+  --text-subtle: #8a837b;
+  --border: #2d2a27;
+  --border-strong: #423e3a;
+  --accent: #e8945f;
+  --accent-ink: #f0a877;
+  --accent-soft: #2a201a;
+  --accent-contrast: #1a1211;
+  --focus: #f2efea;
+  --shadow-s: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-m: 0 4px 14px -6px rgb(0 0 0 / 0.55);
+  --shadow-l: 0 18px 40px -20px rgb(0 0 0 / 0.75);
+}
