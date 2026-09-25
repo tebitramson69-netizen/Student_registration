@@ -1,0 +1,4 @@
+# Real credentials never go in git.
+app/config/config.php
+*.log
+.DS_Store
