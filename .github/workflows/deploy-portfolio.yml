@@ -41,11 +41,13 @@ jobs:
 
       - name: Build
         env:
-          # This repository serves a GitHub Pages *project* site, so the app
-          # lives under /Student_registration. Drop PUBLIC_BASE_PATH and change
-          # PUBLIC_SITE_URL when you move to a custom domain.
+          # Served from the root of a GitHub Pages *user* site, so there is no
+          # base path. When you move to a custom domain, change this one line
+          # to https://your-domain and add public/CNAME — nothing else.
           PUBLIC_SITE_URL: https://tebitramson69-netizen.github.io
-          PUBLIC_BASE_PATH: /Student_registration
+          # Uncomment ONLY if this ever becomes a project site under a sub-path:
+          # PUBLIC_BASE_PATH: /portfolio
+          PUBLIC_CONTACT_ENDPOINT: ${{ vars.PUBLIC_CONTACT_ENDPOINT }}
         run: npm run build
 
       - uses: actions/upload-pages-artifact@v3

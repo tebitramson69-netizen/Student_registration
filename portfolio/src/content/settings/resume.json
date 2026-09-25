@@ -1,0 +1,40 @@
+{
+  "experience": [
+    {
+      "title": "Software Engineering Intern",
+      "organisation": "NgahTech Group",
+      "location": "Simbock, Yaoundé, Cameroon",
+      "period": "2026",
+      "summary": "Industrial internship placement for my HND programme, working inside a Cameroonian software company rather than on coursework — my first experience of building software to someone else's requirements, deadlines and review.",
+      "points": [],
+      "tags": []
+    },
+    {
+      "title": "Independent Project Work",
+      "organisation": "Self-directed",
+      "location": "Douala, Cameroon",
+      "period": "2025 — Present",
+      "summary": "Everything on this site outside the internship was designed, built and maintained on my own initiative — choosing the problem, the schema, the architecture and the security model, then living with those decisions long enough to find out which ones were wrong.",
+      "points": [
+        "Three public repositories spanning a custom PHP MVC framework, a Laravel application and a foundational CRUD system.",
+        "Roughly 33,000 lines of PHP written and reviewed across the two larger projects.",
+        "Security work done deliberately rather than as an afterthought: CSRF tokens, session hardening, login rate limiting and credential externalisation."
+      ],
+      "tags": ["PHP", "Laravel", "MySQL", "Git"]
+    }
+  ],
+  "education": [
+    {
+      "title": "HND, Software Engineering",
+      "organisation": "Saint Louis University Institute",
+      "location": "Douala, Cameroon",
+      "period": "2025 — Present",
+      "summary": "Higher National Diploma in Software Engineering. The programme combines software development coursework with a compulsory industrial internship, which is how I ended up at NgahTech Group.",
+      "points": [
+        "Coursework across software development, databases and computer networking.",
+        "Industrial placement completed as part of the programme requirements."
+      ],
+      "tags": []
+    }
+  ]
+}

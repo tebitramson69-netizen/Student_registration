@@ -27,33 +27,21 @@ import { profile, socials } from '../data/site';
           <h2 class="contact__aside-title">Direct</h2>
           <ul class="contact__links">
             {socials.map((social) => (
-              <li class={social.verified ? undefined : 'contact__links-pending'}>
-                {social.verified ? (
-                  <a
-                    href={social.href}
-                    target={social.href.startsWith('http') ? '_blank' : undefined}
-                    rel={social.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-                  >
-                    <Icon name={social.icon} size={17} />
-                    <span>
-                      <span class="contact__link-label">{social.label}</span>
-                      <span class="contact__link-handle">{social.handle}</span>
-                    </span>
-                    {social.href.startsWith('http') && (
-                      <span class="visually-hidden">(opens in a new tab)</span>
-                    )}
-                  </a>
-                ) : (
-                  /* Rendered but not linked: an unverified URL should never
-                     become a link that goes nowhere. */
+              <li>
+                <a
+                  href={social.href}
+                  target={social.href.startsWith('http') ? '_blank' : undefined}
+                  rel={social.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                >
+                  <Icon name={social.icon} size={17} />
                   <span>
-                    <Icon name={social.icon} size={17} />
-                    <span>
-                      <span class="contact__link-label">{social.label}</span>
-                      <span class="contact__link-handle">{social.handle}</span>
-                    </span>
+                    <span class="contact__link-label">{social.label}</span>
+                    <span class="contact__link-handle">{social.handle}</span>
                   </span>
-                )}
+                  {social.href.startsWith('http') && (
+                    <span class="visually-hidden">(opens in a new tab)</span>
+                  )}
+                </a>
               </li>
             ))}
             <li>
@@ -115,9 +103,6 @@ import { profile, socials } from '../data/site';
     font-size: var(--step--1);
     word-break: break-word;
   }
-
-  .contact__links-pending { opacity: 0.62; }
-  .contact__links-pending .contact__link-handle { font-style: italic; color: var(--text-subtle); }
 
   .contact__note {
     margin-top: var(--space-l);

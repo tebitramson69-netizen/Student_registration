@@ -20,17 +20,11 @@ import { url } from '../lib/url';
       />
 
       <div class="resume__download no-print" data-reveal>
-        {cv.available ? (
+        {cv.available && (
           <a class="button button--primary" href={url(cv.path)} download={cv.filename}>
             <Icon name="download" size={16} />
             Download CV (PDF)
           </a>
-        ) : (
-          <p class="resume__cv-pending">
-            <strong>Owner note:</strong> no CV PDF is published yet. Drop one at
-            <code>public/{cv.path}</code> and set <code>cv.available = true</code> in
-            <code>src/data/site.ts</code> — this button appears automatically.
-          </p>
         )}
         <a class="button button--secondary" href={`mailto:${profile.email}`}>
           <Icon name="mail" size={16} />
@@ -100,17 +94,6 @@ import { url } from '../lib/url';
     gap: var(--space-2xs);
   }
 
-  .resume__cv-pending {
-    flex: 1 1 24rem;
-    padding: var(--space-2xs) var(--space-xs);
-    border: 1px dashed var(--border-strong);
-    border-radius: var(--radius-s);
-    background: var(--bg-sunken);
-    font-size: var(--step--2);
-    color: var(--text-subtle);
-  }
-  .resume__cv-pending code { font-family: var(--font-mono); }
-  .resume__cv-pending strong { color: var(--text-muted); }
 
   .resume__skills {
     display: grid;

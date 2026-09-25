@@ -4,7 +4,7 @@
  * a handful, they inherit `currentColor`, and they cost no extra request.
  */
 interface Props {
-  name: 'github' | 'linkedin' | 'mail' | 'location' | 'arrow' | 'external' | 'sun' | 'moon' | 'menu' | 'close' | 'download';
+  name: 'github' | 'linkedin' | 'mail' | 'x' | 'link' | 'location' | 'arrow' | 'external' | 'sun' | 'moon' | 'menu' | 'close' | 'download';
   size?: number;
   class?: string;
 }
@@ -33,6 +33,10 @@ const paths: Record<Props['name'], string> = {
     '<path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>',
   download:
     '<path d="M12 3v11m0 0 4-4m-4 4-4-4M4 19h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>',
+  x:
+    '<path d="M17.53 3h3.04l-6.64 7.59L21.75 21h-5.9l-4.62-6.04L5.94 21H2.9l7.1-8.12L2.25 3h6.05l4.18 5.52L17.53 3Zm-1.07 16.2h1.69L7.6 4.72H5.79L16.46 19.2Z" fill="currentColor"/>',
+  link:
+    '<path d="M10.5 13.5a4 4 0 0 0 5.66 0l2.83-2.83a4 4 0 1 0-5.66-5.66l-1.4 1.41M13.5 10.5a4 4 0 0 0-5.66 0L5 13.33a4 4 0 1 0 5.66 5.66l1.4-1.41" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/>',
 };
 ---
 <svg

@@ -1,10 +1,10 @@
-# Everything here is meant to be found.
+# Everything on this site is meant to be found, except the editor.
 User-agent: *
 Allow: /
+Disallow: /admin/
 
 # Astro's sitemap integration emits this index at build time.
 #
-# NOTE: this path must match your deployment. The default below assumes the
-# GitHub Pages *project* site (PUBLIC_BASE_PATH=/Student_registration).
-# On a custom domain, change it to https://your-domain/sitemap-index.xml
-Sitemap: https://tebitramson69-netizen.github.io/Student_registration/sitemap-index.xml
+# NOTE: this must match your deployment. Change it when you move to a custom
+# domain, e.g. https://your-domain/sitemap-index.xml
+Sitemap: https://tebitramson69-netizen.github.io/sitemap-index.xml

@@ -1,0 +1,327 @@
+# =============================================================================
+# Sveltia CMS — the editor behind /admin
+#
+# ONE LINE YOU MAY NEED TO CHANGE: `repo:` below. It must name the repository
+# this site is actually deployed from. Everything else is already correct.
+# =============================================================================
+
+backend:
+  name: github
+  repo: tebitramson69-netizen/tebitramson69-netizen.github.io
+  branch: main
+  # OAuth proxy. GitHub will not let a browser log in directly, so a tiny
+  # relay does the token exchange. Deploy `sveltia-cms-auth` (free, Cloudflare
+  # Workers), then uncomment this and put your worker's address here.
+  # Full steps are in portfolio/README.md → "Turning on the editor".
+  # base_url: https://YOUR-WORKER.workers.dev
+
+# Lets you edit with no login at all while running `npm run dev` locally.
+# Harmless in production: it only ever applies on localhost.
+local_backend: true
+
+# Where uploaded images are stored.
+#
+# This is `src/`, not `public/`, on purpose: images here are resized and
+# converted by the build, so a photo straight off a phone is served small
+# without you having to think about it. Do not move this to `public/`.
+media_folder: src/assets/uploads
+public_folder: /src/assets/uploads
+
+# Every save is a real commit, so the history reads like a changelog.
+site_url: https://tebitramson69-netizen.github.io
+display_url: https://tebitramson69-netizen.github.io
+
+collections:
+  # ---------------------------------------------------------------------------
+  # YOU — the things that appear across the whole site
+  # ---------------------------------------------------------------------------
+  - name: settings
+    label: Your details
+    files:
+      - name: profile
+        label: Profile & photo
+        file: src/content/settings/profile.json
+        description: Your name, what you do, your photo and your CV.
+        fields:
+          - { name: name, label: Full name, widget: string }
+          - {
+              name: initials,
+              label: Initials,
+              widget: string,
+              hint: 'Two letters. Used for the logo and the photo placeholder.',
+              pattern: ['^.{1,3}$', 'One to three characters'],
+            }
+          - {
+              name: role,
+              label: Professional title,
+              widget: string,
+              hint: 'Shown under your name and in Google results.',
+            }
+          - {
+              name: availability,
+              label: Availability badge,
+              widget: string,
+              required: false,
+              hint: 'The small pill at the top of the homepage. Leave empty to hide it.',
+            }
+          - {
+              name: tagline,
+              label: Headline,
+              widget: text,
+              hint: 'The big sentence on the homepage. One or two lines — keep it short and specific.',
+            }
+          - {
+              name: intro,
+              label: Short introduction,
+              widget: text,
+              required: false,
+              hint: 'The paragraph under the headline.',
+            }
+          - { name: location, label: Location, widget: string, required: false }
+          - { name: email, label: Email address, widget: string }
+          - {
+              name: summary,
+              label: Search-engine description,
+              widget: text,
+              hint: 'What Google shows under your site name. Aim for 120–160 characters — the build fails above 200.',
+            }
+          - {
+              name: photo,
+              label: Profile photograph,
+              widget: image,
+              required: false,
+              hint: 'Head and shoulders, plain background, good light, looking at the camera. Portrait shape (taller than wide) works best. Leave empty and a designed monogram is shown instead.',
+            }
+          - {
+              name: photoAlt,
+              label: Photo description,
+              widget: string,
+              required: false,
+              hint: 'Read aloud by screen readers. Describe the photo in a few words.',
+            }
+          - {
+              name: cv,
+              label: CV / résumé (PDF),
+              widget: file,
+              required: false,
+              media_folder: '../../../public/cv',  # PDFs are not processed, so they stay in public/
+              public_folder: /cv,
+              hint: 'Upload a PDF and a Download CV button appears automatically. Leave empty and no button is shown.',
+            }
+
+      - name: social
+        label: Links
+        file: src/content/settings/social.json
+        description: Your GitHub, LinkedIn and anywhere else people should find you.
+        fields:
+          - name: links
+            label: Profile links
+            widget: list
+            label_singular: link
+            summary: '{{fields.label}} — {{fields.url}}'
+            hint: 'Leave a web address empty and that link is hidden everywhere on the site. Fill it in and it appears in the header, footer and contact page at once.'
+            fields:
+              - { name: label, label: Name, widget: string }
+              - {
+                  name: icon,
+                  label: Icon,
+                  widget: select,
+                  options: [github, linkedin, x, link, mail],
+                }
+              - {
+                  name: url,
+                  label: Web address,
+                  widget: string,
+                  required: false,
+                  hint: 'The full address, starting with https://',
+                }
+
+      - name: skills
+        label: Skills
+        file: src/content/settings/skills.json
+        description: What you work with, grouped by what each thing is for.
+        fields:
+          - name: groups
+            label: Skill groups
+            widget: list
+            label_singular: group
+            summary: '{{fields.title}}'
+            fields:
+              - { name: title, label: Group name, widget: string }
+              - {
+                  name: note,
+                  label: One-line note,
+                  widget: string,
+                  required: false,
+                  hint: 'The small italic line under the group name.',
+                }
+              - name: items
+                label: Skills
+                widget: list
+                label_singular: skill
+                summary: '{{fields.name}}'
+                fields:
+                  - { name: name, label: Skill, widget: string }
+                  - {
+                      name: detail,
+                      label: What you use it for,
+                      widget: string,
+                      required: false,
+                      hint: 'One short line. This is what makes the list credible rather than generic.',
+                    }
+
+      - name: resume
+        label: Experience & education
+        file: src/content/settings/resume.json
+        fields:
+          - name: experience
+            label: Experience
+            widget: list
+            label_singular: role
+            summary: '{{fields.title}} — {{fields.organisation}}'
+            fields:
+              - { name: title, label: Job title, widget: string }
+              - { name: organisation, label: Company or organisation, widget: string }
+              - { name: location, label: Location, widget: string, required: false }
+              - {
+                  name: period,
+                  label: Dates,
+                  widget: string,
+                  required: false,
+                  hint: 'Free text, for example "2026" or "Jan 2026 — Present".',
+                }
+              - {
+                  name: summary,
+                  label: What the role was,
+                  widget: text,
+                  required: false,
+                  hint: 'A short paragraph. Say what you actually did — the projects, the stack, one thing you shipped.',
+                }
+              - {
+                  name: points,
+                  label: Bullet points,
+                  widget: list,
+                  required: false,
+                  hint: 'Optional. Specific achievements, one per line.',
+                }
+              - { name: tags, label: Technologies, widget: list, required: false }
+
+          - name: education
+            label: Education
+            widget: list
+            label_singular: qualification
+            summary: '{{fields.title}} — {{fields.organisation}}'
+            fields:
+              - { name: title, label: Qualification, widget: string }
+              - { name: organisation, label: School or university, widget: string }
+              - { name: location, label: Location, widget: string, required: false }
+              - { name: period, label: Dates, widget: string, required: false }
+              - { name: summary, label: Description, widget: text, required: false }
+              - { name: points, label: Bullet points, widget: list, required: false }
+              - { name: tags, label: Subjects, widget: list, required: false }
+
+  # ---------------------------------------------------------------------------
+  # YOUR WORK — one entry per project
+  # ---------------------------------------------------------------------------
+  - name: projects
+    label: Projects
+    label_singular: project
+    folder: src/content/projects
+    extension: md
+    format: frontmatter
+    create: true
+    slug: '{{slug}}'
+    summary: '{{order}} · {{title}}'
+    sortable_fields: [order, title, year]
+    description: Your case studies. The homepage shows the ones marked Featured.
+    fields:
+      - { name: title, label: Project name, widget: string }
+      - {
+          name: summary,
+          label: One-line summary,
+          widget: text,
+          hint: 'Shown on the project card. One sentence that says what it is and who it is for.',
+        }
+      - {
+          name: role,
+          label: Your role,
+          widget: string,
+          default: Sole developer,
+        }
+      - {
+          name: category,
+          label: Category,
+          widget: string,
+          hint: 'For example "Education platform" or "Media pipeline".',
+        }
+      - {
+          name: order,
+          label: Position,
+          widget: number,
+          value_type: int,
+          min: 1,
+          default: 1,
+          hint: 'Lower numbers appear first. Put your strongest work at 1.',
+        }
+      - {
+          name: featured,
+          label: Show on the homepage,
+          widget: boolean,
+          default: false,
+        }
+      - {
+          name: year,
+          label: Year,
+          widget: string,
+          hint: 'Typed as text, for example 2026.',
+          pattern: ['^\d{4}$', 'Four digits, for example 2026'],
+        }
+      - {
+          name: status,
+          label: Status,
+          widget: string,
+          hint: 'Be honest — "In active development" reads better than a vague claim of completion.',
+        }
+      - {
+          name: tech,
+          label: Built with,
+          widget: list,
+          hint: 'One technology per entry. The first five show on the card.',
+        }
+      - {
+          name: repo,
+          label: Source code link,
+          widget: string,
+          required: false,
+        }
+      - { name: demo, label: Live demo link, widget: string, required: false }
+      - name: metrics
+        label: Key numbers
+        widget: list
+        required: false
+        label_singular: number
+        summary: '{{fields.value}} {{fields.label}}'
+        hint: 'Optional. Only real, countable facts — tables, tests, lines of code. Never invent a number.'
+        fields:
+          - { name: value, label: Number, widget: string }
+          - { name: label, label: What it counts, widget: string }
+      - {
+          name: image,
+          label: Screenshot,
+          widget: image,
+          required: false,
+          hint: 'Roughly 1600 × 1000. Leave empty and a designed placeholder is shown instead of a broken image.',
+        }
+      - {
+          name: imageAlt,
+          label: Screenshot description,
+          widget: string,
+          required: false,
+          hint: 'Describe what the screenshot shows. Required if you add a screenshot.',
+        }
+      - {
+          name: body,
+          label: Case study,
+          widget: markdown,
+          hint: 'The full write-up. Use "## Heading" for sections. A good case study covers the problem, your decisions, the hardest part, and what you would change.',
+        }

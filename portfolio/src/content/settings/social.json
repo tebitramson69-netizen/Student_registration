@@ -1,0 +1,8 @@
+{
+  "links": [
+    { "label": "GitHub", "icon": "github", "url": "https://github.com/tebitramson69-netizen" },
+    { "label": "LinkedIn", "icon": "linkedin", "url": "" },
+    { "label": "X", "icon": "x", "url": "" },
+    { "label": "Website", "icon": "link", "url": "" }
+  ]
+}

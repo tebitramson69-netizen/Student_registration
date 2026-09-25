@@ -1,6 +1,9 @@
 ---
+import { Image } from 'astro:assets';
 import { portrait, profile } from '../data/site';
-import { url } from '../lib/url';
+import { uploaded } from '../lib/images';
+
+const photo = uploaded(portrait.src);
 
 /**
  * The hero portrait. When no photograph is available it renders a designed
@@ -13,15 +16,17 @@ interface Props {
 const { size = 'hero' } = Astro.props;
 ---
 <figure class={`portrait portrait--${size}`} data-reveal>
-  {portrait.available ? (
-    <img
+  {photo ? (
+    <Image
       class="portrait__image"
-      src={url(portrait.src)}
+      src={photo}
       alt={portrait.alt}
-      width="520"
-      height="650"
+      widths={[320, 480, 640, 960]}
+      width={960}
+      height={1200}
+      sizes="(min-width: 62em) 24rem, min(100vw - 2rem, 22rem)"
+      loading="eager"
       fetchpriority="high"
-      decoding="async"
     />
   ) : (
     <div class="portrait__placeholder" role="img" aria-label={`Monogram standing in for a photograph of ${profile.name}`}>

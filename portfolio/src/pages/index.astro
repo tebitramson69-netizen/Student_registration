@@ -5,7 +5,7 @@ import Portrait from '../components/Portrait.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import SectionHeading from '../components/SectionHeading.astro';
 import Icon from '../components/Icon.astro';
-import { profile, verifiedSocials, skillGroups } from '../data/site';
+import { profile, socials, skillGroups } from '../data/site';
 import { url } from '../lib/url';
 
 const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
@@ -22,10 +22,12 @@ const featured = projects.filter((p) => p.data.featured);
   <section class="hero">
     <div class="page hero__inner">
       <div class="hero__text">
-        <p class="hero__status" data-reveal>
-          <span class="hero__dot" aria-hidden="true"></span>
-          Open to internships and junior roles
-        </p>
+        {profile.availability && (
+          <p class="hero__status" data-reveal>
+            <span class="hero__dot" aria-hidden="true"></span>
+            {profile.availability}
+          </p>
+        )}
 
         <h1 class="hero__name" data-reveal style="--reveal-delay:60ms">
           {profile.name}
@@ -41,12 +43,11 @@ const featured = projects.filter((p) => p.data.featured);
           {profile.tagline}
         </p>
 
-        <p class="hero__body" data-reveal style="--reveal-delay:220ms">
-          Most of what I build is unglamorous and load-bearing: schemas that hold up,
-          authentication that actually authenticates, and arithmetic that gives the
-          same answer on every page it appears. I am looking for the work where those
-          things matter.
-        </p>
+        {profile.intro && (
+          <p class="hero__body" data-reveal style="--reveal-delay:220ms">
+            {profile.intro}
+          </p>
+        )}
 
         <div class="hero__actions" data-reveal style="--reveal-delay:280ms">
           <a class="button button--primary" href={url('/projects')}>
@@ -57,7 +58,7 @@ const featured = projects.filter((p) => p.data.featured);
         </div>
 
         <ul class="hero__socials" data-reveal style="--reveal-delay:340ms">
-          {verifiedSocials.map((social) => (
+          {socials.map((social) => (
             <li>
               <a
                 href={social.href}

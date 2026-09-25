@@ -20,23 +20,18 @@ const { entries } = Astro.props;
         </p>
         <p class="timeline__summary">{entry.summary}</p>
 
-        {entry.points && (
+        {entry.points.length > 0 && (
           <ul class="timeline__points">
             {entry.points.map((point) => <li>{point}</li>)}
           </ul>
         )}
 
-        {entry.tags && (
+        {entry.tags.length > 0 && (
           <ul class="tag-list timeline__tags">
             {entry.tags.map((t) => <li class="tag">{t}</li>)}
           </ul>
         )}
 
-        {entry.todo && (
-          <p class="timeline__todo">
-            <strong>Owner note:</strong> {entry.todo}
-          </p>
-        )}
       </div>
     </li>
   ))}
@@ -96,19 +91,6 @@ const { entries } = Astro.props;
 
   .timeline__tags { margin-top: var(--space-s); }
 
-  /* Deliberately visible: an unfinished section should look unfinished to its
-     owner rather than reading as a finished claim. */
-  .timeline__todo {
-    margin-top: var(--space-s);
-    padding: var(--space-2xs) var(--space-xs);
-    border: 1px dashed var(--border-strong);
-    border-radius: var(--radius-s);
-    background: var(--bg-sunken);
-    color: var(--text-subtle);
-    font-size: var(--step--2);
-    max-width: var(--measure);
-  }
-  .timeline__todo strong { color: var(--text-muted); }
 
   @media (min-width: 48em) {
     .timeline__item { padding-left: var(--space-l); }

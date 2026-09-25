@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- This page is a private editor. It must never appear in search results. -->
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Edit my site</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <style>
+      :root { color-scheme: light dark; }
+      body { margin: 0; background: #fbfaf8; }
+      @media (prefers-color-scheme: dark) { body { background: #121110; } }
+
+      /* Shown until the editor finishes loading, then removed. On a slow
+         connection this is the difference between "loading" and "broken". */
+      #boot {
+        position: fixed;
+        inset: 0;
+        display: grid;
+        place-content: center;
+        justify-items: center;
+        gap: 1rem;
+        font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        color: #5b564f;
+        text-align: center;
+        padding: 1.5rem;
+      }
+      @media (prefers-color-scheme: dark) { #boot { color: #a8a199; } }
+
+      #boot .mark {
+        display: grid;
+        place-items: center;
+        width: 52px;
+        height: 52px;
+        border-radius: 12px;
+        background: #1a1817;
+        color: #fbfaf8;
+        font-family: ui-serif, Georgia, serif;
+        font-size: 1.15rem;
+      }
+      @media (prefers-color-scheme: dark) { #boot .mark { background: #f2efea; color: #121110; } }
+
+      #boot p { margin: 0; font-size: 0.9rem; max-width: 30ch; line-height: 1.6; }
+      #boot a { color: inherit; }
+    </style>
+  </head>
+  <body>
+    <div id="boot">
+      <div class="mark">TR</div>
+      <p id="boot-message">Loading the editor…</p>
+    </div>
+
+    <!--
+      The editor bundle, served from this site rather than a CDN. It is copied
+      out of node_modules by `scripts/vendor-cms.mjs` on every dev and build,
+      so the version is pinned by package-lock.json.
+    -->
+    <script type="module" src="/admin/cms/sveltia-cms.js"></script>
+
+    <script>
+      (function () {
+        var boot = document.getElementById('boot');
+        if (!boot) return;
+
+        // The editor mounts its own root into <body> and does not know about
+        // this placeholder, so remove it ourselves the moment anything else
+        // appears — otherwise the two overlap.
+        var observer = new MutationObserver(function () {
+          var mounted = Array.prototype.some.call(document.body.children, function (el) {
+            return el !== boot && el.tagName !== 'SCRIPT';
+          });
+          if (mounted) {
+            boot.remove();
+            observer.disconnect();
+          }
+        });
+        observer.observe(document.body, { childList: true });
+
+        // If nothing has mounted after 15 seconds, say so plainly rather than
+        // leaving a message that claims to be loading forever.
+        setTimeout(function () {
+          if (!boot.isConnected) return;
+          observer.disconnect();
+          var msg = document.getElementById('boot-message');
+          if (msg) {
+            msg.innerHTML =
+              'The editor did not load. Check your internet connection and reload. ' +
+              'If it still will not start, see the <b>Turning on the editor</b> ' +
+              'section of <code>README.md</code>.';
+          }
+        }, 15000);
+      })();
+    </script>
+  </body>
+</html>

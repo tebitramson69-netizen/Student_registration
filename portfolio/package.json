@@ -3,19 +3,26 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Professional portfolio of Tebit Ramson Titih — Software Engineering student and full-stack developer, Douala, Cameroon.",
+  "description": "Professional portfolio of Tebit Ramson Titih \u2014 Software Engineering student and full-stack developer, Douala, Cameroon.",
   "scripts": {
+    "vendor:cms": "node scripts/vendor-cms.mjs",
+    "predev": "npm run vendor:cms",
     "dev": "astro dev",
-    "start": "astro dev",
+    "start": "npm run dev",
+    "prebuild": "npm run vendor:cms",
     "build": "astro check && astro build",
     "build:fast": "astro build",
     "preview": "astro preview",
-    "check": "astro check"
+    "check": "astro check",
+    "audit:browser": "node scripts/audit.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",
     "@astrojs/sitemap": "^3.6.0",
     "astro": "^5.16.0",
     "typescript": "^5.9.3"
+  },
+  "devDependencies": {
+    "@sveltia/cms": "^0.221.0"
   }
 }

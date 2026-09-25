@@ -1,6 +1,8 @@
 ---
 import type { CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets';
 import { url } from '../lib/url';
+import { uploaded } from '../lib/images';
 import Icon from './Icon.astro';
 
 interface Props {
@@ -16,11 +18,20 @@ interface Props {
 const { project, index = 0, headingLevel: Heading = 'h3' } = Astro.props;
 const { data } = project;
 const href = url(`/projects/${project.id}`);
+const shot = uploaded(data.image);
 ---
 <article class="card" data-reveal style={`--reveal-delay:${Math.min(index, 4) * 70}ms`}>
   <a class="card__media" href={href} tabindex="-1" aria-hidden="true">
-    {data.image ? (
-      <img src={url(data.image)} alt="" width="800" height="500" loading="lazy" decoding="async" />
+    {shot ? (
+      <Image
+        src={shot}
+        alt=""
+        widths={[400, 600, 800]}
+        width={800}
+        height={500}
+        sizes="(min-width: 72em) 22rem, (min-width: 46em) 45vw, calc(100vw - 2rem)"
+        loading="lazy"
+      />
     ) : (
       /* No screenshot yet — a designed fallback rather than a broken frame. */
       <span class="card__fallback">

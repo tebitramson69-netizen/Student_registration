@@ -1,0 +1,14 @@
+{
+  "name": "Tebit Ramson Titih",
+  "initials": "TR",
+  "role": "Software Engineering Student & Full-Stack Developer",
+  "availability": "Open to internships and junior roles",
+  "tagline": "I build complete web systems in PHP and MySQL \u2014 and I build them for the way things actually work in Cameroon.",
+  "intro": "Most of what I build is unglamorous and load-bearing: schemas that hold up, authentication that actually authenticates, and arithmetic that gives the same answer on every page it appears. I am looking for the work where those things matter.",
+  "location": "Douala, Cameroon",
+  "email": "tebitramsontitih@gmail.com",
+  "summary": "HND Software Engineering student in Douala, Cameroon, building real web systems with PHP, MySQL and Laravel \u2014 including a school platform built for Cameroonian grading.",
+  "photo": "",
+  "photoAlt": "Tebit Ramson Titih, software engineering student, photographed from the shoulders up.",
+  "cv": ""
+}

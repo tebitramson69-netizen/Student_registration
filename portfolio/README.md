@@ -16,7 +16,7 @@ Vercel, cPanel shared hosting, or an Apache/XAMPP `htdocs` folder.
 3. [Develop](#develop)
 4. [Build](#build)
 5. [Deploy](#deploy)
-6. [Updating content](#updating-content) ← **start here for day-to-day edits**
+6. [Updating content](#updating-content) - **the editor at /admin. Start here.**
 7. [Things you still need to supply](#things-you-still-need-to-supply)
 8. [Contact form](#contact-form)
 9. [Analytics](#analytics)
@@ -88,36 +88,60 @@ The result is `dist/` — static files, nothing else.
 
 ## Deploy
 
-### GitHub Pages (recommended — free, and you are already on GitHub)
+### GitHub Pages (recommended - free, and you are already on GitHub)
 
-A workflow is included at `../.github/workflows/deploy-portfolio.yml`. It builds
-and publishes on every push to `main`, and can also be run by hand from the
-Actions tab.
+This site is configured for a GitHub Pages **user site**, so it serves from the
+root with no sub-path. That is deliberate: it is the same configuration a custom
+domain needs, so moving to your own domain later is adding one file, not
+reconfiguring and re-testing every internal link.
 
-To turn it on:
+**Move it into its own repository first.** Keeping a portfolio inside a
+repository called `Student_registration` puts that word in the URL of the site
+you send to employers.
 
-1. Push this branch and merge it to `main`.
-2. In the repository, go to **Settings → Pages** and set **Source** to
-   **GitHub Actions**.
-3. Run the workflow once from the **Actions** tab.
+```bash
+# from the root of Student_registration
+git subtree split --prefix=portfolio -b portfolio-only
+```
 
-Because this is a *project* site, it will live at
-`https://tebitramson69-netizen.github.io/Student_registration/`. The workflow
-sets `PUBLIC_BASE_PATH=/Student_registration` for you.
+Then create a **public** repository on GitHub named exactly
+`tebitramson69-netizen.github.io` - the name must match your username, and that
+is what makes it a user site - and push to it:
+
+```bash
+git push git@github.com:tebitramson69-netizen/tebitramson69-netizen.github.io.git portfolio-only:main
+```
+
+Copy `.github/workflows/deploy-portfolio.yml` into the new repository and change
+`working-directory: portfolio` to `working-directory: .`, since the portfolio is
+now the whole repository.
+
+Finally, in the new repository: **Settings -> Pages -> Source -> GitHub Actions**.
+
+Your site is then at `https://tebitramson69-netizen.github.io`, and the CMS
+config already points at that repository.
 
 ### Custom domain
 
 Buy a domain, point it at GitHub Pages, then:
 
 1. Add a file `public/CNAME` containing just your domain, e.g. `ramsontitih.dev`.
-2. Set `PUBLIC_SITE_URL` to `https://ramsontitih.dev`.
-3. **Remove** `PUBLIC_BASE_PATH` (a custom domain serves from the root).
+2. Change `PUBLIC_SITE_URL` in the deploy workflow to `https://ramsontitih.dev`.
+3. Update the `Sitemap:` line in `public/robots.txt` to match.
+4. In `public/admin/config.yml`, change `site_url` and `display_url`, and add the
+   domain to your auth worker's `ALLOWED_DOMAINS`.
+
+There is no base path to remove - the site already serves from the root, which
+is why this migration is four small edits rather than a reconfiguration.
 
 ### Netlify or Vercel
 
 Point the project at the `portfolio` directory. Build command `npm run build`,
 publish directory `dist`. Set `PUBLIC_SITE_URL` in the dashboard's environment
 variables. Leave `PUBLIC_BASE_PATH` unset.
+
+Netlify and Vercel both rebuild automatically on every CMS save, same as GitHub
+Pages, because a save is a commit.
 
 ### Apache / XAMPP / shared cPanel hosting
 
@@ -146,85 +170,164 @@ This keeps the commit history rather than squashing it.
 
 ## Updating content
 
-**Almost every change you will want to make is in one of two places.**
+**You do not need to touch code to change anything on this site.**
 
-### 1. Facts about you — `src/data/site.ts`
+Go to `https://your-site/admin`, sign in with GitHub, and edit in forms. Every
+save is a real commit to your repository, which triggers a rebuild — your change
+is live in about a minute. It works on your phone.
 
-| What | Where in the file |
+### What you can edit there
+
+| Section in the editor | What it controls |
 | --- | --- |
-| Name, role, tagline, location, email | `profile` |
-| GitHub / LinkedIn / email links | `socials` |
-| Skills, grouped | `skillGroups` |
-| Jobs and internships | `experience` |
-| Schools and qualifications | `education` |
-| CV download button | `cv` |
-| Profile photograph | `portrait` |
-| Navigation menu | `nav` |
+| **Your details → Profile & photo** | Name, job title, headline, intro, location, email, **your profile photograph**, **your CV PDF**, and the availability badge |
+| **Your details → Links** | GitHub, LinkedIn, X, personal site. **Leave a web address empty and that link disappears from the whole site**; fill it in and it appears in the header, footer and contact page at once |
+| **Your details → Skills** | Skill groups and the one-line description under each skill |
+| **Your details → Experience & education** | Jobs, internships, schools — add, reorder, delete |
+| **Projects** | Add a new case study, upload screenshots, mark one as featured, reorder |
 
-Every entry is commented. Adding a skill is adding one line to an array.
+### Uploading your photo
 
-### 2. Projects — `src/content/projects/*.md`
+Editor → **Your details → Profile & photo** → click **Profile photograph** →
+upload. That is the whole process. Until you do, the site shows a designed
+monogram rather than a broken image.
 
-Each project is one Markdown file. The front-matter block at the top is
-validated against a schema in `src/content.config.ts`, so if you misspell a
-field the build tells you exactly which file and which field.
+**You do not need to resize it first.** Upload the photo straight off your
+phone. The build resizes it, converts it to WebP and generates a responsive
+srcset automatically — a 3.2 MB photo was tested and came out at **14 KB** on a
+phone-width screen and 67 KB at the largest size used.
 
-```markdown
----
-title: My New Project
-summary: One sentence for the card.
-role: Sole developer
-category: Web application
-order: 4            # lower numbers appear first
-featured: false     # true puts it on the homepage
-year: '2026'        # quotes required — YAML reads a bare 2026 as a number
-status: In progress
-tech:
-  - PHP
-  - MySQL
-repo: https://github.com/you/repo    # optional
-demo: https://example.com            # optional
-metrics:                             # optional — VERIFIED numbers only
-  - value: '12'
-    label: Database tables
-image: images/projects/my-project.png   # optional
-imageAlt: Description of the screenshot # required if image is set
----
+This is why uploads go to `src/assets/uploads/` and not `public/`: anything in
+`public/` is copied out byte for byte and would be served at full size. Do not
+move the media folder.
 
-## The problem
-...your case study, in normal Markdown...
+### Adding a project
+
+Editor → **Projects → New project**. Fill the fields, write the case study in
+the Markdown box, save. The card, the case-study page, the sitemap entry and the
+"next project" link all appear on their own.
+
+### Turning on the editor
+
+The editor needs permission to write to your repository. There are two ways to
+give it that. **Start with the first one** - it takes about two minutes and
+needs nothing but GitHub.
+
+#### Option A: a personal access token (simplest)
+
+1. Go to <https://github.com/settings/personal-access-tokens/new>
+   (**Fine-grained tokens**).
+2. Set:
+
+   | Field | Value |
+   | --- | --- |
+   | Token name | `Portfolio editor` |
+   | Expiration | 90 days, or whatever you are comfortable re-doing |
+   | Repository access | **Only select repositories** -> pick your portfolio repo |
+   | Permissions -> Repository -> **Contents** | **Read and write** |
+
+3. Generate it and copy the token.
+4. Open `https://your-site/admin`, click **Sign In Using Access Token**, paste.
+
+Use a **fine-grained** token scoped to that one repository, not a classic
+token. A classic token can touch every repository you own; this one can only
+write to your portfolio, which is all the editor needs.
+
+The token is stored in your browser on that device only. It never enters this
+repository and is never sent anywhere except GitHub. Sign out, or delete the
+token on GitHub, and access is gone immediately.
+
+#### Option B: GitHub OAuth (nicer day to day, more setup)
+
+With OAuth you click **Sign In with GitHub** and never handle a token or an
+expiry date. The cost is a one-time setup of roughly ten minutes, because
+GitHub will not let a browser complete a login on its own - a small relay has
+to exchange the code for a token.
+
+**1. Register a GitHub OAuth app**
+
+<https://github.com/settings/developers> -> **OAuth Apps** -> **New OAuth App**.
+
+| Field | Value |
+| --- | --- |
+| Application name | `Portfolio editor` |
+| Homepage URL | `https://tebitramson69-netizen.github.io` |
+| Authorization callback URL | leave it - you fill this in at step 3 |
+
+Register it, then **generate a client secret**. Keep the Client ID and secret
+open in a tab. **That secret is a real credential: it never goes in this
+repository, in `config.yml`, or anywhere a browser can read it.**
+
+**2. Deploy the auth relay**
+
+Create a free account at <https://dash.cloudflare.com>, then deploy
+[`sveltia-cms-auth`](https://github.com/sveltia/sveltia-cms-auth) - its README
+has a one-click path. In the worker's **Settings -> Variables**, add:
+
+| Variable | Value |
+| --- | --- |
+| `GITHUB_CLIENT_ID` | from step 1 |
+| `GITHUB_CLIENT_SECRET` | from step 1 - mark it **encrypted** |
+| `ALLOWED_DOMAINS` | `tebitramson69-netizen.github.io` |
+
+Copy the worker address, e.g. `https://sveltia-cms-auth.yourname.workers.dev`.
+
+**3. Point GitHub back at the relay**
+
+In your OAuth app, set **Authorization callback URL** to
+`https://YOUR-WORKER.workers.dev/callback`.
+
+**4. Tell the editor where the relay is**
+
+In `public/admin/config.yml`, uncomment `base_url:` and put your worker address
+there. Commit and push. **Sign In with GitHub** now works.
+
+### Editing without any of that
+
+While you are developing locally, the editor needs no login at all:
+
+```bash
+npm run dev
 ```
 
-Delete a file and the project disappears, including from the sitemap. No other
-file needs touching.
+Then open <http://localhost:4321/admin>. It reads and writes the files on your
+own disk directly (Chrome or Edge — it uses the File System Access API). This is
+what `local_backend: true` in the config enables, and it only ever applies on
+localhost.
 
-### Adding project screenshots
+### Editing the files by hand
 
-1. Save the image under `public/images/projects/`.
-2. Add `image:` and `imageAlt:` to that project's front-matter.
+You can always skip the editor. The content is plain files:
 
-Until you do, the card shows a designed placeholder rather than a broken frame.
-Use WebP or optimised PNG, roughly 1600×1000, and keep each under ~200 KB.
+```
+src/content/settings/profile.json     you, your photo, your CV
+src/content/settings/social.json      your links
+src/content/settings/skills.json      your skills
+src/content/settings/resume.json      experience and education
+src/content/projects/*.md             one file per case study
+```
 
----
+`src/data/site.ts` reads and **validates** those files. Clear a required field
+and `npm run build` fails with the file name and the exact field, instead of the
+site quietly rendering an empty hero.
 
 ## Things you still need to supply
 
-These are marked visibly on the live site so you cannot forget them.
+All of these are done in the editor at `/admin`. None of them require code.
 
-| # | What | Where to put it |
+| # | What | Where in the editor |
 | --- | --- | --- |
-| 1 | **A professional photograph.** Head-and-shoulders, plain or softly blurred background, good even light, looking at the camera, no one else in frame. Roughly 1000×1250 (4:5 portrait). A phone camera in daylight near a window is completely fine. | Save as `public/images/ramson.jpg`, then set `portrait.available = true` in `src/data/site.ts`. |
-| 2 | **Your LinkedIn URL.** No profile could be verified, so the contact page shows the entry greyed out and deliberately unlinked rather than guessing a URL. | `socials` in `src/data/site.ts` — set `href` and `handle`, then `verified: true`. |
-| 3 | **Your CV as a PDF.** No CV was found in any connected source. | Save as `public/cv/tebit-ramson-titih-cv.pdf`, then set `cv.available = true`. |
-| 4 | **What you actually did at NgahTech Group.** The placement itself is verified; the work you did there is not something anyone else can write for you. | `experience[0].summary` in `src/data/site.ts`. Delete the `todo` line once done. |
-| 5 | **Confirm your study dates.** `2025 — Present` was inferred from coursework records dated October 2025. Correct it if wrong. | `education[0].period`. Delete the `todo` line once done. |
-| 6 | **Project screenshots.** Three placeholders are showing. | See [Adding project screenshots](#adding-project-screenshots). |
+| 1 | **A professional photograph.** Head-and-shoulders, plain or softly blurred background, good even light, looking at the camera, nobody else in frame. Portrait shape. A phone camera in daylight near a window is completely fine - and you do **not** need to resize or compress it first. | Your details -> Profile & photo -> *Profile photograph* |
+| 2 | **Your LinkedIn URL.** No profile could be verified when this site was built, so the link is hidden rather than pointing somewhere invented. | Your details -> Links -> LinkedIn -> *Web address* |
+| 3 | **Your CV as a PDF.** No CV was found in any connected source. The Download CV button appears the moment you upload one. | Your details -> Profile & photo -> *CV / resume* |
+| 4 | **What you actually did at NgahTech Group.** The placement is verified; the work you did there is not something anyone else can write for you. Name the projects, the stack, and one thing you shipped. | Your details -> Experience & education -> *Software Engineering Intern* -> *What the role was* |
+| 5 | **Confirm your study dates.** `2025 - Present` was inferred from coursework records dated October 2025. Correct it if wrong. | Your details -> Experience & education -> Education -> *Dates* |
+| 6 | **Project screenshots.** All three projects currently show a designed placeholder. | Projects -> pick a project -> *Screenshot* |
 
-Each `todo:` note renders as a visible dashed box on the site. Remove the line
-from the data file and the box disappears.
-
----
+None of these render as a visible "unfinished" notice to visitors. A missing
+photo shows a designed monogram, a missing CV shows no button, a missing link
+simply is not there. The site looks finished at every stage - these are
+improvements, not gaps a recruiter will spot.
 
 ## Contact form
 
@@ -358,6 +461,25 @@ Targeting **WCAG 2.2 AA**. Implemented and verified:
   research content during the build**. The published site requires access to
   none of them, and nothing private was copied into it.
 
+### The editor at /admin
+
+The CMS is the one part of this project that touches a credential, so it is
+worth being precise about where that credential lives.
+
+- **Your GitHub OAuth client secret is never in this repository.** It lives only
+  in the Cloudflare worker's encrypted environment variables. `config.yml`
+  contains a public client-side redirect URL and nothing more.
+- `/admin` is a **login gate, not a hidden page**. It is safe that anyone can
+  load it: without a GitHub account that has write access to the repository,
+  signing in gets them nothing. Security comes from GitHub's permissions, not
+  from the URL being secret.
+- It is marked `noindex, nofollow` and disallowed in `robots.txt`, so it stays
+  out of search results.
+- The worker's `ALLOWED_DOMAINS` restricts which sites may complete a login, so
+  someone copying your config onto another domain cannot use your OAuth app.
+- Every save is an ordinary commit by you. Nothing can change your site without
+  appearing in `git log`, and anything can be reverted.
+
 ---
 
 ## Testing
@@ -393,23 +515,32 @@ On a machine where Playwright's own browsers are installed, drop the
 
 ```
 portfolio/
-├── astro.config.mjs        site URL, base path, sitemap
-├── .env.example            every variable, documented, no secrets
-├── scripts/audit.mjs       the browser audit described above
-├── public/                 copied verbatim: favicon, OG image, robots.txt
-│   └── images/             ← your photo and project screenshots go here
-└── src/
-    ├── content.config.ts   schema every project file is validated against
-    ├── content/projects/   the case studies — one Markdown file each
-    ├── data/site.ts        ← every fact about you
-    ├── lib/url.ts          base-path-safe URL helper
-    ├── styles/
-    │   ├── tokens.css      the entire design system
-    │   └── global.css      reset, typography, layout, motion, print
-    ├── components/         BaseHead, Header, Footer, ThemeToggle, ProjectCard,
-    │                       Timeline, Portrait, ContactForm, SectionHeading, Icon
-    ├── layouts/Base.astro  the shell every page uses
-    └── pages/              index, about, projects/, resume, contact, 404
+|- astro.config.mjs          site URL, optional base path, sitemap
+|- .env.example              every variable, documented, no secrets
+|- scripts/audit.mjs         the browser audit described above
+|- public/
+|  |- admin/                 <-- THE EDITOR
+|  |  |- index.html          loads Sveltia CMS
+|  |  \- config.yml          which fields you see, and where they are saved
+|  \- favicon.svg, og-default.svg, robots.txt
+\- src/
+   |- assets/uploads/        <-- your uploaded photos and screenshots land here
+   |                            (in src/, not public/, so the build optimises them)
+   |- content/
+   |  |- settings/*.json     <-- everything about you, written by the editor
+   |  \- projects/*.md       <-- one case study per file
+   |- content.config.ts      schema every project file is validated against
+   |- data/site.ts           reads and VALIDATES the JSON above; do not edit
+   |- lib/
+   |  |- url.ts              base-path-safe URL helper
+   |  \- images.ts           resolves CMS image paths into optimised assets
+   |- styles/
+   |  |- tokens.css          the entire design system
+   |  \- global.css          reset, typography, layout, motion, print
+   |- components/            BaseHead, Header, Footer, ThemeToggle, ProjectCard,
+   |                         Timeline, Portrait, ContactForm, SectionHeading, Icon
+   |- layouts/Base.astro     the shell every page uses
+   \- pages/                 index, about, projects/, resume, contact, 404
 ```
 
 ### Design system

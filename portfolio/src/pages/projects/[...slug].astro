@@ -1,9 +1,11 @@
 ---
 import { getCollection, render } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
+import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import Icon from '../../components/Icon.astro';
 import { url } from '../../lib/url';
+import { uploaded } from '../../lib/images';
 import { profile } from '../../data/site';
 
 export const getStaticPaths = (async () => {
@@ -17,6 +19,7 @@ export const getStaticPaths = (async () => {
 const { project } = Astro.props;
 const { data } = project;
 const { Content } = await render(project);
+const hero = uploaded(data.image);
 
 // Ordering lets us offer "next case study" rather than dead-ending the page.
 const all = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
@@ -102,16 +105,18 @@ const schema = {
     )}
 
     <!-- Hero image, when one exists -->
-    {data.image && (
+    {hero && (
       <div class="page">
         <figure class="case__hero">
-          <img
-            src={url(data.image)}
+          <Image
+            src={hero}
             alt={data.imageAlt ?? `Screenshot of ${data.title}`}
-            width="1600"
-            height="1000"
+            widths={[640, 960, 1280, 1600]}
+            width={1600}
+            height={1000}
+            sizes="(min-width: 72em) 68rem, calc(100vw - 2rem)"
             loading="eager"
-            decoding="async"
+            fetchpriority="high"
           />
         </figure>
       </div>

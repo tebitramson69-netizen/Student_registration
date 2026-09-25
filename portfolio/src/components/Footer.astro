@@ -1,5 +1,5 @@
 ---
-import { nav, profile, verifiedSocials } from '../data/site';
+import { nav, profile, socials } from '../data/site';
 import { url } from '../lib/url';
 import Icon from './Icon.astro';
 
@@ -28,7 +28,7 @@ const year = new Date().getFullYear();
     <div class="site-footer__nav">
       <h2 class="site-footer__heading">Elsewhere</h2>
       <ul>
-        {verifiedSocials.map((social) => (
+        {socials.map((social) => (
           <li>
             <a
               href={social.href}

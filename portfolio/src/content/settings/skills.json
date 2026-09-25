@@ -1,0 +1,46 @@
+{
+  "groups": [
+    {
+      "title": "Backend",
+      "note": "Where most of my work happens.",
+      "items": [
+        { "name": "PHP 8", "detail": "Custom MVC and Laravel — my primary language" },
+        { "name": "Laravel", "detail": "Queues, migrations, policies, Eloquent" },
+        { "name": "Session auth & RBAC", "detail": "Role-based dashboards and route guards" },
+        { "name": "Composer", "detail": "Dependency and autoload management" }
+      ]
+    },
+    {
+      "title": "Databases",
+      "note": "Schema design first, queries second.",
+      "items": [
+        { "name": "MySQL / MariaDB", "detail": "Normalised relational schemas" },
+        { "name": "SQL", "detail": "Joins, aggregates, constraints, indexes" },
+        { "name": "PDO", "detail": "Prepared statements and transactions" },
+        { "name": "Migrations", "detail": "Versioned, repeatable schema changes" }
+      ]
+    },
+    {
+      "title": "Frontend",
+      "note": "No framework unless the problem asks for one.",
+      "items": [
+        { "name": "HTML", "detail": "Semantic, accessible document structure" },
+        { "name": "CSS", "detail": "Responsive layouts, custom properties, dark mode" },
+        { "name": "JavaScript", "detail": "Vanilla DOM work and progressive enhancement" },
+        { "name": "Bootstrap", "detail": "When a project needs speed over bespoke design" }
+      ]
+    },
+    {
+      "title": "Practices & tooling",
+      "note": "How the work gets built and kept honest.",
+      "items": [
+        { "name": "Git & GitHub", "detail": "Branching, reviewable history, CI workflows" },
+        { "name": "Application security", "detail": "CSRF, session hardening, SQL injection, XSS" },
+        { "name": "PHPUnit", "detail": "Automated test suites against real behaviour" },
+        { "name": "XAMPP / Apache", "detail": "Local and shared-host deployment" },
+        { "name": "VS Code", "detail": "Daily development environment" },
+        { "name": "AI-assisted development", "detail": "As a reviewer and pair, not as an author" }
+      ]
+    }
+  ]
+}
