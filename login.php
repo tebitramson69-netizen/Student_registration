@@ -1,10 +1,11 @@
 <?php
 declare(strict_types=1);
 
-require_once "auth.php";
+require_once __DIR__ . "/includes/auth.php";
+require_once __DIR__ . "/includes/layout.php";
 
 if (is_logged_in()) {
-    header("Location: table.php");
+    header('Location: index.php');
     exit();
 }
 
@@ -54,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
                 clear_login_attempts($conn, $username, $ip);
                 login_admin((int)$admin['id'], (string)$admin['username']);
 
-                header("Location: table.php");
+                header('Location: index.php');
                 exit();
             }
 
@@ -68,45 +69,51 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
         $errors[] = 'Could not sign you in right now. Please try again later.';
     }
 }
+
+render_header('Sign in', '', true);
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Sign In</title>
-    <link rel="stylesheet" type="text/css" href="style.css">
-</head>
-<body>
-    <div class="container">
-        <h2>Admin Sign In</h2>
+<section class="card">
+    <div class="card__body">
+        <h1 class="mb-1">Student Registry</h1>
+        <p class="lede">Sign in to manage student records.</p>
 
         <?php if ($notice !== ''): ?>
-            <p class="notice"><?php echo e($notice); ?></p>
+            <div class="flash flash--info mb-4" role="status">
+                <span class="flash__icon" aria-hidden="true">&#8505;</span>
+                <span><strong>Note.</strong> <?php echo e($notice); ?></span>
+            </div>
         <?php endif; ?>
 
         <?php if ($errors): ?>
-            <ul class="errors">
-                <?php foreach ($errors as $error): ?>
-                    <li><?php echo e($error); ?></li>
-                <?php endforeach; ?>
-            </ul>
+            <div class="flash flash--error mb-4" role="alert">
+                <span class="flash__icon" aria-hidden="true">&#9888;</span>
+                <span>
+                    <strong>Error.</strong>
+                    <?php echo e($errors[0]); ?>
+                </span>
+            </div>
         <?php endif; ?>
 
         <form action="login.php" method="post">
             <?php echo csrf_field(); ?>
 
-            <label for="username">Username</label>
-            <input type="text" id="username" name="username"
-                   value="<?php echo e($username); ?>" autocomplete="username" required>
+            <div class="field">
+                <label for="username">Username</label>
+                <input class="input" type="text" id="username" name="username"
+                       value="<?php echo e($username); ?>"
+                       autocomplete="username" autofocus required>
+            </div>
 
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password"
-                   autocomplete="current-password" required>
+            <div class="field">
+                <label for="password">Password</label>
+                <input class="input" type="password" id="password" name="password"
+                       autocomplete="current-password" required>
+            </div>
 
-            <input type="submit" value="SIGN IN">
+            <button class="button w-full" type="submit">Sign in</button>
         </form>
     </div>
-</body>
-</html>
+</section>
+
+<?php render_footer(); ?>

@@ -1,199 +1,200 @@
 <?php
+/**
+ * Student listing.
+ *
+ * The full table is rendered server-side; assets/js/app.js then takes over
+ * searching, sorting and paging through api/students.php. With JavaScript off
+ * the same links and the search form still work.
+ */
+
 declare(strict_types=1);
 
-require_once "auth.php";
+require_once __DIR__ . "/includes/auth.php";
+require_once __DIR__ . "/includes/students.php";
+require_once __DIR__ . "/includes/layout.php";
+
 require_login();
 
-// Number of records per page
-$limit = 15;
-
-// Current page number, never below 1
-$page = isset($_GET['page']) && is_numeric($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
-
-// Sorting. Column and direction are table/keyword identifiers, which a prepared
-// statement cannot bind, so they are validated against a whitelist instead.
-$validColumns = ['id', 'first_name', 'last_name', 'email', 'telephone'];
-$sort  = isset($_GET['sort']) && in_array($_GET['sort'], $validColumns, true) ? $_GET['sort'] : 'first_name';
-$order = isset($_GET['order']) && $_GET['order'] === 'DESC' ? 'DESC' : 'ASC';
-
 $search = trim((string)($_GET['search'] ?? ''));
-
-$where  = '';
-$params = [];
-$types  = '';
-
-if ($search !== '') {
-    // % and _ are wildcards inside LIKE, and \ escapes them. Without this a
-    // search for "%" matches every student and "100_" matches "1000".
-    $escaped = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $search);
-    $like    = '%' . $escaped . '%';
-    $where = "WHERE first_name LIKE ?
-                 OR last_name  LIKE ?
-                 OR email      LIKE ?
-                 OR telephone  LIKE ?";
-    $params = [$like, $like, $like, $like];
-    $types  = 'ssss';
-}
+$sort   = student_sort_column($_GET['sort'] ?? null);
+$order  = student_sort_direction($_GET['order'] ?? null);
+$page   = max(1, (int)($_GET['page'] ?? 1));
 
 try {
-    // Total matching records first, so pagination reflects the search results
-    // rather than the whole table.
-    $countStmt = $conn->prepare("SELECT COUNT(*) AS total FROM students $where");
-    if ($params) {
-        $countStmt->bind_param($types, ...$params);
-    }
-    $countStmt->execute();
-    $totalRows = (int)$countStmt->get_result()->fetch_assoc()['total'];
-    $countStmt->close();
+    $totalRows  = count_students($conn, $search);
+    $totalPages = (int)ceil($totalRows / STUDENTS_PER_PAGE);
 
-    $totalPages = (int)ceil($totalRows / $limit);
-    if ($totalPages > 0 && $page > $totalPages) {
-        $page = $totalPages;
-    }
-    $offset = ($page - 1) * $limit;
+    // An empty result still has a page 1; without this, ?search=zzz&page=5
+    // reports offset 60 and renders a Previous link under an empty table.
+    $page = $totalPages > 0 ? min($page, $totalPages) : 1;
 
-    $stmt = $conn->prepare(
-        "SELECT id, first_name, last_name, email, telephone
-         FROM students
-         $where
-         ORDER BY $sort $order
-         LIMIT ? OFFSET ?"
-    );
-    $stmt->bind_param($types . 'ii', ...array_merge($params, [$limit, $offset]));
-    $stmt->execute();
-    $users = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-    $stmt->close();
-
+    $offset   = ($page - 1) * STUDENTS_PER_PAGE;
+    $students = find_students($conn, $search, $sort, $order, STUDENTS_PER_PAGE, $offset);
     $conn->close();
 } catch (mysqli_sql_exception $e) {
-    // An uncaught exception would print the SQL and absolute paths, which a
-    // default XAMPP install (display_errors=On) shows to the visitor.
     error_log('Student listing failed: ' . $e->getMessage());
     http_response_code(500);
     exit('Could not load the student list. Please try again later.');
 }
 
-/**
- * Build a column header link that toggles the sort direction.
- */
-function sortLink(string $column, string $label, string $currentSort, string $currentOrder, string $search, int $page): string
-{
-    $order = ($currentSort === $column && $currentOrder === 'ASC') ? 'DESC' : 'ASC';
-    $query = ['sort' => $column, 'order' => $order, 'page' => $page];
-    if ($search !== '') {
-        $query['search'] = $search;
-    }
+/** Header cells, in display order. */
+$columns = [
+    'id'         => 'ID',
+    'first_name' => 'First name',
+    'last_name'  => 'Last name',
+    'email'      => 'Email',
+    'telephone'  => 'Telephone',
+];
 
-    return '<a href="table.php?' . e(http_build_query($query)) . '">' . e($label) . '</a>';
-}
+$listUrl = static fn(array $overrides): string => url_with('table.php', array_merge([
+    'search' => $search,
+    'sort'   => $sort,
+    'order'  => $order,
+    'page'   => $page > 1 ? $page : null,
+], $overrides));
 
-/**
- * Build a pagination link that preserves the current search and sorting.
- */
-function pageLink(int $targetPage, string $search, string $sort, string $order): string
-{
-    $query = ['page' => $targetPage, 'sort' => $sort, 'order' => $order];
-    if ($search !== '') {
-        $query['search'] = $search;
-    }
-
-    return 'table.php?' . e(http_build_query($query));
-}
+render_header('Students', 'students');
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Students Table</title>
-    <link rel="stylesheet" type="text/css" href="style.css">
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-        th { background-color: #f4f4f4; }
-        .search-box { margin-bottom: 15px; }
-        .pagination { margin-top: 15px; }
-        .pagination a { margin: 0 5px; text-decoration: none; padding: 5px 10px; border: 1px solid #ccc; }
-        .pagination a.active { background-color: #007BFF; color: white; }
-    </style>
-</head>
-<body>
-    <div class="topbar">
-        <span>Signed in as <strong><?php echo e(current_admin_username()); ?></strong></span>
-        <form action="logout.php" method="post" class="inline-form">
-            <?php echo csrf_field(); ?>
-            <button type="submit" class="link-button">Sign out</button>
-        </form>
+
+<div class="page-head">
+    <div>
+        <h1>Students</h1>
+        <p>
+            <?php echo $totalRows === 0
+                ? 'Nobody is registered yet.'
+                : e(number_format($totalRows)) . ' student' . ($totalRows === 1 ? '' : 's') . ' on record.'; ?>
+        </p>
+    </div>
+    <a class="button" href="form.php">Register a student</a>
+</div>
+
+<section class="card"
+         data-students
+         data-endpoint="api/list-students.php"
+         data-csrf="<?php echo e(csrf_token()); ?>"
+         data-state-sort="<?php echo e($sort); ?>"
+         data-state-order="<?php echo e($order); ?>"
+         data-state-page="<?php echo (int)$page; ?>">
+
+    <div class="card__header">
+        <div class="toolbar grow">
+            <!-- Submitting normally is the no-JavaScript path; app.js intercepts
+                 it and searches as you type instead. -->
+            <form method="get" action="table.php" class="search" role="search">
+                <span class="search__icon" aria-hidden="true">&#9906;</span>
+                <label class="visually-hidden" for="search">Search students</label>
+                <input class="input" type="search" id="search" name="search" data-search
+                       placeholder="Search name, email or telephone"
+                       value="<?php echo e($search); ?>" autocomplete="off">
+                <span class="search__spinner" aria-hidden="true"></span>
+                <input type="hidden" name="sort" value="<?php echo e($sort); ?>">
+                <input type="hidden" name="order" value="<?php echo e($order); ?>">
+                <noscript><button class="button button--sm" type="submit">Search</button></noscript>
+            </form>
+            <a class="button button--ghost" data-export
+               href="<?php echo e(url_with('export.php', ['search' => $search])); ?>">Download CSV</a>
+        </div>
     </div>
 
-    <h2>Registered Students (Alphabetical Order)</h2>
+    <p class="visually-hidden" role="status" aria-live="polite" data-live></p>
 
-    <!-- Search Form -->
-    <div class="search-box">
-        <form method="get" action="table.php">
-            <input type="text" name="search" placeholder="Search by name, email, or phone"
-                   value="<?php echo e($search); ?>">
-            <input type="submit" value="Search">
-        </form>
+    <div class="table-wrap">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col" class="col-num">#</th>
+                    <?php foreach ($columns as $column => $label):
+                        $isActive = $sort === $column;
+                        $next     = $isActive && $order === 'ASC' ? 'DESC' : 'ASC';
+                    ?>
+                    <th scope="col" data-column="<?php echo e($column); ?>"
+                        <?php if ($isActive): ?>aria-sort="<?php echo $order === 'ASC' ? 'ascending' : 'descending'; ?>"<?php endif; ?>>
+                        <a class="table__sort" data-sort
+                           href="<?php echo e($listUrl(['sort' => $column, 'order' => $next, 'page' => null])); ?>">
+                            <?php echo e($label); ?>
+                            <span class="arrow" aria-hidden="true"><?php
+                                echo $isActive ? ($order === 'ASC' ? '&#9650;' : '&#9660;') : '';
+                            ?></span>
+                        </a>
+                    </th>
+                    <?php endforeach; ?>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+
+            <tbody data-rows>
+                <?php if (!$students): ?>
+                <tr>
+                    <td colspan="7">
+                        <div class="empty">
+                            <strong><?php echo $search !== '' ? 'No students match that search' : 'No students yet'; ?></strong>
+                            <span><?php echo $search !== ''
+                                ? 'Try a different name, email or phone number.'
+                                : 'Register the first student to see them listed here.'; ?></span>
+                        </div>
+                    </td>
+                </tr>
+                <?php endif; ?>
+
+                <?php $rowNumber = $offset + 1; foreach ($students as $student): ?>
+                <tr>
+                    <td class="col-num"><?php echo $rowNumber++; ?></td>
+                    <td data-label="ID"><?php echo e($student['id']); ?></td>
+                    <td data-label="First name"><?php echo e($student['first_name']); ?></td>
+                    <td data-label="Last name"><?php echo e($student['last_name']); ?></td>
+                    <td data-label="Email"><?php echo e($student['email']); ?></td>
+                    <td data-label="Telephone"><?php echo e($student['telephone']); ?></td>
+                    <td data-label="Actions">
+                        <div class="cell-actions">
+                            <a class="link-button" href="update.php?id=<?php echo (int)$student['id']; ?>">Edit</a>
+                            <!-- data-confirm routes through the accessible dialog in
+                                 layout.php; without JavaScript the form just submits. -->
+                            <form action="delete.php" method="post" class="inline-form"
+                                  data-confirm="Delete <?php echo e($student['first_name'] . ' ' . $student['last_name']); ?>? This cannot be undone."
+                                  data-confirm-title="Delete student"
+                                  data-confirm-accept="Delete">
+                                <?php echo csrf_field(); ?>
+                                <input type="hidden" name="id" value="<?php echo (int)$student['id']; ?>">
+                                <button type="submit" class="link-button link-button--danger">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
     </div>
 
-    <table>
-        <tr>
-            <th>#</th>
-            <th><?php echo sortLink('id', 'ID', $sort, $order, $search, $page); ?></th>
-            <th><?php echo sortLink('first_name', 'First Name', $sort, $order, $search, $page); ?></th>
-            <th><?php echo sortLink('last_name', 'Last Name', $sort, $order, $search, $page); ?></th>
-            <th><?php echo sortLink('email', 'Email', $sort, $order, $search, $page); ?></th>
-            <th><?php echo sortLink('telephone', 'Telephone', $sort, $order, $search, $page); ?></th>
-            <th>Actions</th>
-        </tr>
-        <?php if (!$users): ?>
-        <tr><td colspan="7">No students found.</td></tr>
-        <?php endif; ?>
-        <?php
-        $rowNumber = $offset + 1;
-        foreach ($users as $user): ?>
-        <tr>
-            <td><?php echo $rowNumber++; ?></td>
-            <td><?php echo e($user['id']); ?></td>
-            <td><?php echo e($user['first_name']); ?></td>
-            <td><?php echo e($user['last_name']); ?></td>
-            <td><?php echo e($user['email']); ?></td>
-            <td><?php echo e($user['telephone']); ?></td>
-            <td>
-                <a href="update.php?id=<?php echo (int)$user['id']; ?>">Update</a> |
-                <form action="delete.php" method="post" class="inline-form"
-                      onsubmit="return confirm('Are you sure you want to delete this student?');">
-                    <?php echo csrf_field(); ?>
-                    <input type="hidden" name="id" value="<?php echo (int)$user['id']; ?>">
-                    <button type="submit" class="link-button">Delete</button>
-                </form>
-            </td>
-        </tr>
-        <?php endforeach; ?>
-    </table>
+    <div class="pager">
+        <span class="pager__summary" data-summary>
+            <?php echo $totalRows === 0
+                ? 'No students'
+                : 'Showing ' . e((string)($offset + 1)) . '&ndash;' . e((string)($offset + count($students)))
+                  . ' of ' . e(number_format($totalRows)); ?>
+        </span>
 
-    <!-- Pagination Controls -->
-    <div class="pagination">
-        <?php if ($page > 1): ?>
-            <a href="<?php echo pageLink($page - 1, $search, $sort, $order); ?>">Previous</a>
-        <?php endif; ?>
+        <nav class="pager__pages" data-pages aria-label="Pagination">
+            <?php if ($page > 1): ?>
+                <a class="pager__page" rel="prev" data-page="<?php echo $page - 1; ?>"
+                   href="<?php echo e($listUrl(['page' => $page - 1 > 1 ? $page - 1 : null])); ?>">Previous</a>
+            <?php endif; ?>
 
-        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-            <a href="<?php echo pageLink($i, $search, $sort, $order); ?>"
-               class="<?php echo ($i === $page) ? 'active' : ''; ?>">
-               <?php echo $i; ?>
-            </a>
-        <?php endfor; ?>
+            <?php foreach (pagination_window($page, $totalPages) as $p): ?>
+                <?php if ($p === null): ?>
+                    <span class="pager__gap">&hellip;</span>
+                <?php else: ?>
+                    <a class="pager__page" data-page="<?php echo $p; ?>"
+                       href="<?php echo e($listUrl(['page' => $p > 1 ? $p : null])); ?>"
+                       <?php echo $p === $page ? 'aria-current="page"' : ''; ?>><?php echo $p; ?></a>
+                <?php endif; ?>
+            <?php endforeach; ?>
 
-        <?php if ($page < $totalPages): ?>
-            <a href="<?php echo pageLink($page + 1, $search, $sort, $order); ?>">Next</a>
-        <?php endif; ?>
+            <?php if ($page < $totalPages): ?>
+                <a class="pager__page" rel="next" data-page="<?php echo $page + 1; ?>"
+                   href="<?php echo e($listUrl(['page' => $page + 1])); ?>">Next</a>
+            <?php endif; ?>
+        </nav>
     </div>
+</section>
 
-<button type="button" onclick="location.href='form.php';">Register another student</button>
-<br><br>
-<button type="button" onclick="location.href='export.php';">Download CSV</button>
-</body>
-</html>
+<?php render_footer(); ?>

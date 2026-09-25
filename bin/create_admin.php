@@ -15,7 +15,7 @@ if (PHP_SAPI !== 'cli') {
     exit('This script may only be run from the command line.');
 }
 
-require_once __DIR__ . '/connection.php';
+require_once __DIR__ . '/../includes/connection.php';
 
 const MIN_PASSWORD_LENGTH = 10;
 

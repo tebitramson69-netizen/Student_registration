@@ -1,0 +1,9 @@
+# Never reachable over HTTP. These files are require'd from disk, which this
+# does not affect.
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+</IfModule>

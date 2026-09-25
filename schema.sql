@@ -14,9 +14,12 @@ CREATE TABLE IF NOT EXISTS students (
     id         INT AUTO_INCREMENT PRIMARY KEY,
     first_name VARCHAR(100) NOT NULL,
     last_name  VARCHAR(100) NOT NULL,
+    -- Stored lower-case by normalise_student(), so the UNIQUE key below really
+    -- does prevent the same person registering twice with different casing.
     email      VARCHAR(255) NOT NULL,
     telephone  VARCHAR(30)  NOT NULL,
     created_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_students_email (email),
     -- The listing sorts and searches on the name columns.
     INDEX idx_students_first_name (first_name),
     INDEX idx_students_last_name (last_name)

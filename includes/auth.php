@@ -70,6 +70,30 @@ function require_login(): void
     $_SESSION['last_activity'] = time();
 }
 
+/**
+ * The same guard for a JSON endpoint.
+ *
+ * require_login() redirects to the sign-in page, which an XHR would receive as
+ * a 200 containing HTML. An API answers 401 so the caller can react.
+ */
+function require_login_json(): void
+{
+    if (!is_logged_in()
+        || (isset($_SESSION['last_activity'])
+            && (time() - (int)$_SESSION['last_activity']) > SESSION_IDLE_TIMEOUT)) {
+        if (is_logged_in()) {
+            logout_admin();
+        }
+
+        http_response_code(401);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['error' => 'Your session has expired. Please sign in again.']);
+        exit();
+    }
+
+    $_SESSION['last_activity'] = time();
+}
+
 function login_admin(int $id, string $username): void
 {
     // A new session id on privilege change defeats session fixation: an id

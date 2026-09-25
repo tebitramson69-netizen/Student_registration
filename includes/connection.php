@@ -7,7 +7,7 @@
  * absent the local XAMPP defaults below are used, which keeps a fresh clone
  * working out of the box on a development machine.
  *
- * Copy config.example.php to config.php and edit it before deploying.
+ * Copy includes/config.example.php to includes/config.php and edit it before deploying.
  */
 
 declare(strict_types=1);

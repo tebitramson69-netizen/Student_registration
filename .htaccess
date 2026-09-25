@@ -1,0 +1,65 @@
+# Apache configuration for the Student Registry.
+#
+# Note: these rules govern HTTP requests only. A file denied here is still
+# available to PHP's require/include, which reads it from disk.
+
+# The dashboard, not a directory listing.
+DirectoryIndex index.php
+Options -Indexes
+
+# Include-only PHP, the CLI script, the tests and the migrations live in their
+# own directories, each denied by its own .htaccess. Denying by filename here
+# instead would be a trap: <FilesMatch> matches the basename in subdirectories
+# too, so a rule for "students.php" would also block "api/students.php".
+
+# ------------------------------------------------------------ non-web material
+# schema.sql was downloadable over HTTP, which handed out the table layout.
+<FilesMatch "\.(sql|md|log|ini|json|lock|dist|bak|sh)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Dotfiles, including .git and .htaccess itself.
+<FilesMatch "^\.">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# ---------------------------------------------------------- security headers
+<IfModule mod_headers.c>
+    # No inline <script> or style attribute is used anywhere, so the policy can
+    # refuse both outright. Adding 'unsafe-inline' here would undo most of it.
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set Referrer-Policy "same-origin"
+    Header always set X-Frame-Options "DENY"
+    Header always set Permissions-Policy "geolocation=(), camera=(), microphone=()"
+
+    # Never let a proxy or the browser cache a signed-in page.
+    <FilesMatch "\.php$">
+        Header always set Cache-Control "no-store, must-revalidate"
+    </FilesMatch>
+</IfModule>
+
+# Uncomment once the site is served over HTTPS. Sending it over plain HTTP
+# would be ignored, and enabling it before a certificate is in place locks
+# visitors out of the site.
+# <IfModule mod_headers.c>
+#     Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+# </IfModule>
+
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 7 days"
+    ExpiresByType application/javascript "access plus 7 days"
+</IfModule>

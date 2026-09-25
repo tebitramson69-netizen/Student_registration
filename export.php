@@ -1,19 +1,17 @@
 <?php
 declare(strict_types=1);
 
-require_once "auth.php";
+require_once __DIR__ . "/includes/auth.php";
+require_once __DIR__ . "/includes/helpers.php";
+require_once __DIR__ . "/includes/students.php";
 require_login();
 
-// Select the columns explicitly so the CSV rows always line up with the header
-// below, whatever order the table happens to declare them in.
+// Export what is on screen. Downloading the whole table from a filtered view
+// silently hands back rows the admin did not ask for.
+$search = trim((string)($_GET['search'] ?? ''));
+
 try {
-    $stmt = $conn->prepare(
-        "SELECT id, first_name, last_name, email, telephone
-         FROM students
-         ORDER BY first_name ASC, last_name ASC"
-    );
-    $stmt->execute();
-    $result = $stmt->get_result();
+    $result = stream_students($conn, $search);
 } catch (mysqli_sql_exception $e) {
     error_log('Student export failed: ' . $e->getMessage());
     http_response_code(500);
@@ -23,23 +21,8 @@ try {
 // Force a download once the query has succeeded, so an error page is never
 // sent with CSV headers already attached.
 header('Content-Type: text/csv; charset=utf-8');
-header('Content-Disposition: attachment; filename=students.csv');
-
-/**
- * A cell starting with =, +, - or @ is treated as a formula by Excel and
- * LibreOffice when the CSV is opened, so a student named "=cmd|..." would run
- * as one. Prefixing a single quote keeps the cell as text.
- */
-function csv_safe(string|int|float|null $value): string
-{
-    $value = (string)$value;
-
-    if ($value !== '' && in_array($value[0], ['=', '+', '-', '@', "\t", "\r"], true)) {
-        return "'" . $value;
-    }
-
-    return $value;
-}
+$filename = $search === '' ? 'students.csv' : 'students-filtered.csv';
+header('Content-Disposition: attachment; filename=' . $filename);
 
 $output = fopen('php://output', 'w');
 fputcsv($output, ['ID', 'First Name', 'Last Name', 'Email', 'Telephone']);
@@ -49,6 +32,6 @@ while ($row = $result->fetch_assoc()) {
 }
 
 fclose($output);
-$stmt->close();
+$result->free();
 $conn->close();
 exit();

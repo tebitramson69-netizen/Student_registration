@@ -1,5 +1,5 @@
 # Local database credentials - never commit this file
-config.php
+includes/config.php
 
 # Editor and OS noise
 .vscode/
